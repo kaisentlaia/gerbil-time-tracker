@@ -72,6 +72,23 @@ body {
   background-color: $bg-light;
   max-height: 75vh;
 
+  .form-control {
+    background-color: $bg;
+    color: $text;
+    border-color: $border-dark;
+  
+    &::placeholder {
+      color: $text-muted;
+    }
+  
+    &:focus {
+      color: $text; 
+      background-color: $bg;
+      box-shadow: 0 0 0 .2rem rgba(134, 134, 134, 0.25);
+      border-color: $border-dark;
+    }
+  }
+
   .list-group {    
     .list-group-item {
       padding: 0.25rem 0.5rem;
