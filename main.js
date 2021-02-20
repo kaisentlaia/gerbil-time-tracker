@@ -26,7 +26,10 @@ function createWindow () {
   mainWindow.on('closed', function () {
     mainWindow = null
   })
+  
+  mainWindow.removeMenu()
 }
+
 
 app.on('ready', createWindow)
 
