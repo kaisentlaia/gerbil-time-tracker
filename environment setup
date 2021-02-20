@@ -22,34 +22,93 @@ add in src/app/app.component.html
 </div>
 
 npm run build
-npm i -D electron@latest
+npm install --save-dev electron@latest
 
-Create a file called app.js inside gerbil. Require BrowserWindow and app from Electron.
+Create a file called main.js inside gerbil. Require BrowserWindow and app from Electron.
 Using BrowserWindow, you'll create a new desktop windows screen and initialize it when the Electron app is ready.
 
-const { app, BrowserWindow } = require('electron')
-const path  = require('path');
+const {app, BrowserWindow} = require('electron')
+const url = require("url");
+const path = require("path");
 
-let win
+let mainWindow
 
-async function createWindow () {
-  // Create the browser window.
-  win = new BrowserWindow({
-	width: 800,
-	height: 600
+function createWindow () {
+  mainWindow = new BrowserWindow({
+    width: 800,
+    height: 600,
+    webPreferences: {
+      nodeIntegration: true
+    }
   })
- 
-  try{
-	let res = await win.loadFile(__dirname + "/dist/gerbil/index.html")
-  } catch(error){
-  	console.log(error);
-  }
- 
-  win.on('closed', () => {
-	win = null
+
+  mainWindow.loadURL(
+    url.format({
+      pathname: path.join(__dirname, `/dist/index.html`),
+      protocol: "file:",
+      slashes: true
+    })
+  );
+  // Open the DevTools.
+  mainWindow.webContents.openDevTools()
+
+  mainWindow.on('closed', function () {
+    mainWindow = null
   })
 }
 
 app.on('ready', createWindow)
 
+app.on('window-all-closed', function () {
+  if (process.platform !== 'darwin') app.quit()
+})
+
+app.on('activate', function () {
+  if (mainWindow === null) createWindow()
+})
+
+
+app.on('ready', createWindow)
+
 npm start
+
+Go to the angular.json file in your project's folder, and change the value of the projects → architect → build → options → outputPath key from dist/angular-electron-demo to just dist:
+
+Next, in the package.json file, add the main key with the value set to main.js:
+
+    {
+      "name": "angular-10-electron-demo",
+      "version": "0.0.0",
+      "main": "main.js",
+      // [...]
+    }
+
+Next, add a script for conveniently starting the Electron app after building the Angular 10 project:
+
+    {
+      "name": "angular-electron-demo",
+      "version": "0.0.0",
+      "main": "main.js",
+      "scripts": {
+        "ng": "ng",
+        "start": "ng serve",
+        "build": "ng build",
+        "test": "ng test",
+        "lint": "ng lint",
+        "e2e": "ng e2e",
+        "start:electron": "ng build --base-href ./ && electron ."
+      }, 
+      // [...]
+    }
+
+Go to the tsconfig.json file and simply update the target key from es2015 to es5:
+
+{
+  "compilerOptions": {
+    "target": "es5",
+}
+
+npm run build && npm start
+npm run start:electron
+
+
