@@ -1,0 +1,55 @@
+git clone https://github.com/kaisentlaia/gerbil.git
+ng new gerbil
+cd gerbil/
+npm install bootstrap jquery
+
+add in angular.json inside architect->build->options
+            "styles": [
+              "src/styles.scss",
+              "node_modules/bootstrap/dist/css/bootstrap.min.css"
+            ],
+            "scripts": [
+              "node_modules/jquery/dist/jquery.min.js",
+              "node_modules/bootstrap/dist/js/bootstrap.min.js"
+            ]
+
+add in src/app/app.component.html
+
+<div class="container">
+  <div class="py-5 text-center">
+    <h2>Gerbil</h2>
+  </div>
+</div>
+
+npm run build
+npm i -D electron@latest
+
+Create a file called app.js inside gerbil. Require BrowserWindow and app from Electron.
+Using BrowserWindow, you'll create a new desktop windows screen and initialize it when the Electron app is ready.
+
+const { app, BrowserWindow } = require('electron')
+const path  = require('path');
+
+let win
+
+async function createWindow () {
+  // Create the browser window.
+  win = new BrowserWindow({
+	width: 800,
+	height: 600
+  })
+ 
+  try{
+	let res = await win.loadFile(__dirname + "/dist/gerbil/index.html")
+  } catch(error){
+  	console.log(error);
+  }
+ 
+  win.on('closed', () => {
+	win = null
+  })
+}
+
+app.on('ready', createWindow)
+
+npm start
