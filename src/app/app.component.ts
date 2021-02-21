@@ -16,10 +16,11 @@ export class AppComponent implements AfterViewInit {
   tasks: Task[];
   todayTasks: Task[];
   activeTask: Task;
+  selectedTask: Task;
   openTask: Task;
   newTask: string;
   selectedDate: Date;
-  totals: any;
+  totals: any[];
   totalHours: any;
 
   constructor(
@@ -33,6 +34,7 @@ export class AppComponent implements AfterViewInit {
       (val) => {
         if (typeof(this.activeTask) !== 'undefined' ) {
           this.activeTask.end = null;
+          this.updateTotals();
         }
       }
     );
@@ -98,11 +100,15 @@ export class AppComponent implements AfterViewInit {
 
       this.tasks.push(this.activeTask);
       this.newTask = null;
-      if (this.electronService.isElectronApp) {
-        this.electronService.ipcRenderer.send('save', this.tasks);
-      }
-      this.getTodayTasks();
+      this.saveData();
     }
+  }
+
+  saveData() {
+    if (this.electronService.isElectronApp) {
+      this.electronService.ipcRenderer.send('save', this.tasks);
+    }
+    this.getTodayTasks();
   }
 
   switchTask(newTask) {
@@ -118,11 +124,7 @@ export class AppComponent implements AfterViewInit {
     now.setMilliseconds(0);
     this.tasks.find(x => x.name === this.activeTask.name && x.start === this.activeTask.start && x.end === this.activeTask.end ).end = now;
     this.activeTask = undefined;
-    this.getTodayTasks();
-  }
-
-  editTask() {
-
+    this.saveData();
   }
 
   getDurationString(task: Task) {
@@ -195,36 +197,88 @@ export class AppComponent implements AfterViewInit {
   }
 
   updateTotals() {
-    this.totals = {};
+    const totals = {};
     // console.log('updateTotals called, todayTasks ', this.todayTasks);
     let maxValue = 0;
     this.totalHours = 0;
     for (const task of this.todayTasks) {
       // console.log('processing task ', task);
-      if (!this.totals.hasOwnProperty(task.name)) {
+      if (!totals.hasOwnProperty(task.name)) {
         // console.log('creating ' + task.name + ' key in totals');
-        this.totals[task.name] = {total: 0, active: true};
+        totals[task.name] = {total: 0};
       }
+      totals[task.name].name = task.name;
       let tempEnd = new Date();
-      if (task.end != null) {
+      if (task.end == null && !totals[task.name].active) {
         // console.log('setting task end date to now');
-        this.totals[task.name].active = false;
+        totals[task.name].active = true;
+      } else {
         tempEnd = task.end;
+        totals[task.name].active = false;
       }
       const duration = tempEnd.getTime() - task.start.getTime();
-      this.totals[task.name].total += duration;
+      totals[task.name].total += duration;
       this.totalHours += duration;
-      if (this.totals[task.name].total > maxValue) {
-        maxValue = this.totals[task.name].total;
+      if (totals[task.name].total > maxValue) {
+        maxValue = totals[task.name].total;
       }
     }
 
+    const sortable = [];
+    for (const taskName of Object.keys(totals)) {
+      totals[taskName].percent = 100;
+      if (totals[taskName].total < maxValue) {
+        totals[taskName].percent = Math.round(totals[taskName].total * 100 / maxValue);
+      }
+      sortable.push([totals[taskName], totals[taskName].total]);
+    }
+
     this.totalHours = (Math.round(((this.totalHours / (1000 * 60 * 60)) % 24) * 4) / 4).toFixed(2);
+
+    sortable.sort( (a, b) => {
+      return b[1] - a[1];
+    });
+
+    this.totals = sortable;
 
     // console.log('calculated totals ', this.totals);
   }
 
   millisToDecH(millis) {
     return (Math.round(((millis / (1000 * 60 * 60)) % 24) * 4) / 4).toFixed(2);
+  }
+
+  clearSelection() {
+    this.selectedTask = undefined;
+    this.openTask = undefined;
+  }
+
+  selectTask(task) {
+    this.selectedTask = task;
+    console.log('selected task', task);
+  }
+
+  editTask() {
+    this.openTask = this.selectedTask;
+    console.log('editing task', this.openTask);
+  }
+
+  deleteTask() {
+    console.log('deleting task', this.openTask);
+    const indexGlobal = this.tasks.indexOf(this.selectedTask);
+    const index = this.todayTasks.indexOf(this.selectedTask);
+    if (indexGlobal > -1) {
+      this.tasks.splice(indexGlobal, 1);
+    }
+    if (index > -1) {
+      this.todayTasks.splice(index, 1);
+    }
+    this.clearSelection();
+    this.saveData();
+  }
+
+  saveTask() {
+    this.clearSelection();
+    this.saveData();
   }
 }

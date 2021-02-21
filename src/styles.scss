@@ -106,9 +106,11 @@ body {
   }
 }
 
-// .totals-overview {
-//   height: 100px;
-// }
+.totals-overview {
+  .progress-bar {
+    overflow: initial;
+  }
+}
 
 .form-control {
   background-color: $bg-light;
