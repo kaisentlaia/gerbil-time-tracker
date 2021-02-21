@@ -1,63 +1,46 @@
 <div class="cover-container d-flex h-100 p-3 flex-column">
   <main role="main" class="inner h-100 d-flex flex-column">
-
     
-    <form class="form-inline mb-2">
+    <div class="form-inline mb-2">
       <button type="button" class="btn btn-dark btn-sm mr-sm-1">&lt;</button>
       <button type="button" class="btn btn-dark btn-sm mr-sm-1">Today</button>
       <button type="button" class="btn btn-dark btn-sm mr-sm-1">&gt;</button>
-      <input type="date" class="form-control form-control-sm w-auto">    
-    </form>
+      <input type="date" class="form-control form-control-sm w-auto" value="{{date | date: 'MM/dd/yyyy'}}">    
+    </div>
 
     <div class="d-flex align-items-center">
       <div class="flex-grow-1 text-truncate">
-        <h4 class="text-truncate">Template massaging (with bootstrap 4)</h4>
-        <p class="font-weight-bold mb-auto">1h 15min</p>
+        <h4 class="text-truncate">{{activeTask?.name}}</h4>
+        <p class="font-weight-bold mb-auto">{{getDurationString(activeTask)}}</p>
       </div>
       <div class="text-right">
-        <button type="button" class="btn btn-danger">Stop</button>
+        <button *ngIf="activeTask" type="button" class="btn btn-danger" (click)="endTask()">Stop</button>
       </div>
     </div>
 
-    <form>
-      <div class="form-row pt-2 pb-3 pl-1 pr-1">
-        <div class="flex-grow-1">
-          <input type="text" class="form-control" placeholder="Task name">
-        </div>
-        <div>
-          <button type="button" class="ml-2 btn btn-dark">Switch</button>
-        </div>
+    <div class="form-row pt-2 pb-3 pl-1 pr-1">
+      <div class="flex-grow-1">
+        <input name="taskName" type="text" class="form-control" placeholder="Task name" [(ngModel)]="newTask" (keyup.enter)="switchTask(newTask)">
       </div>
-    </form>
+      <div>
+        <button *ngIf="!activeTask" type="button" class="ml-2 btn btn-success" (click)="beginTask(newTask)" [disabled]="!newTask">Start</button>
+        <button *ngIf="activeTask" type="button" class="ml-2 btn btn-dark" (click)="switchTask(newTask)" [disabled]="!newTask">Switch</button>
+      </div>
+    </div>
 
     <div class="row flex-grow-1">
       <div class="col">
         <div class="card h-100">
 
-          <ul class="list-group list-group-flush">
-            <li class="list-group-item list-group-item-action list-group-item-light d-flex justify-content-between align-items-center">
-              <span class="hours">09:00 - 10:35</span>
-              <span class="text-truncate flex-grow-1">Code writing</span>
-              <span class="badge badge-dark badge-pill">01:35</span>
-            </li>
-            <li class="list-group-item d-flex list-group-item-action list-group-item-light justify-content-between align-items-center">
-              <span class="hours">10:35 - 11:28</span>
-              <span class="text-truncate flex-grow-1">Gerbil wrangling</span>
-              <span class="badge badge-dark badge-pill">00:43</span>
-            </li>
-            <li class="list-group-item d-flex list-group-item-action list-group-item-light justify-content-between align-items-center">
-              <span class="hours">11:28 - 12:50</span>
-              <span class="text-truncate flex-grow-1">Licking bootstrap</span>
-              <span class="badge badge-dark badge-pill">01:22</span>
-            </li>
-            <li class="list-group-item d-flex list-group-item-action list-group-item-light justify-content-between align-items-center">
-              <span class="hours">12:50 -     </span>
-              <span class="text-truncate flex-grow-1">Template massaging (with bootstrap 4)</span>
-              <span class="badge badge-dark badge-pill">01:22</span>
+          <ul *ngIf="!openTask" class="list-group list-group-flush">
+            <li class="list-group-item list-group-item-action list-group-item-light d-flex justify-content-between align-items-center" *ngFor="let task of tasks">
+              <span class="hours">{{task.start | date: 'HH:mm'}} - {{task.end | date: 'HH:mm'}}</span>
+              <span class="text-truncate flex-grow-1">{{task.name}}</span>
+              <span class="badge badge-dark badge-pill">{{getDurationPill(task)}}</span>
             </li>
           </ul>
 
-          <div class="card-body">
+          <div *ngIf="openTask" class="card-body">
             <form>
               <div class="form-group row">
                 <label class="col-sm-1 col-form-label col-form-label-sm text-right">Task</label>

@@ -5,8 +5,8 @@ npm install bootstrap jquery
 
 add in angular.json inside architect->build->options
             "styles": [
-              "src/styles.scss",
               "node_modules/bootstrap/dist/css/bootstrap.min.css"
+              "src/styles.scss",
             ],
             "scripts": [
               "node_modules/jquery/dist/jquery.min.js",
@@ -67,12 +67,9 @@ app.on('activate', function () {
   if (mainWindow === null) createWindow()
 })
 
-
-app.on('ready', createWindow)
-
 npm start
 
-Go to the angular.json file in your project's folder, and change the value of the projects → architect → build → options → outputPath key from dist/angular-electron-demo to just dist:
+Go to the angular.json file in your project's folder, and change the value of the projects → architect → build → options → outputPath key from dist/gerbil to just dist:
 
 Next, in the package.json file, add the main key with the value set to main.js:
 
