@@ -1,7 +1,7 @@
 {
   "name": "gerbil",
   "version": "0.0.0",
-  "main": "main.js",
+  "main": "main.ts",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
@@ -23,6 +23,7 @@
     "@angular/router": "~9.1.0",
     "bootstrap": "^4.6.0",
     "jquery": "^3.5.1",
+    "ngx-electron": "^2.2.0",
     "rxjs": "~6.5.4",
     "tslib": "^1.10.0",
     "zone.js": "~0.10.2"

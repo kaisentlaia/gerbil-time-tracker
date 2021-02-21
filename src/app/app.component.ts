@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { Task } from './task.model';
 import { Observable, interval, Subscription } from 'rxjs';
+import { ElectronService } from 'ngx-electron';
 
 @Component({
   selector: 'app-root',
@@ -17,6 +18,11 @@ export class AppComponent {
   newTask: string;
   date: Date;
   
+  constructor(
+    public electronService: ElectronService
+  ) {
+  }
+  
   ngOnInit(): void {
     this.updateSubscription = interval(60000).subscribe(
       (val) => { 
@@ -31,6 +37,12 @@ export class AppComponent {
 
   beginTask(newTask) {
     if(typeof(newTask)!="undefined" && newTask && newTask!="") {
+      console.log("beginning new task");
+      console.log("isElectronApp",this.electronService.isElectronApp);
+      if (this.electronService.isElectronApp) {
+        console.log("sending message to REQUEST_CHANNEL");
+        this.electronService.ipcRenderer.send('REQUEST_CHANNEL', 'my message');
+      }
       let now = new Date();
       now.setDate(this.date.getDate());
       now.setMonth(this.date.getMonth());
@@ -44,8 +56,8 @@ export class AppComponent {
       } as Task;
 
       this.tasks.push(this.activeTask);
+      this.newTask = null;
     }
-    this.newTask = null;
   }
 
   switchTask(newTask) {

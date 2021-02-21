@@ -1,6 +1,9 @@
-const {app, BrowserWindow} = require('electron')
+const {app, BrowserWindow, ipcMain} = require('electron')
 const url = require("url");
 const path = require("path");
+ipcMain.on('REQUEST_CHANNEL', (event, arg) =>
+  console.log('got a message from electron service','event', event, 'message', arg)
+);
 
 let mainWindow
 
