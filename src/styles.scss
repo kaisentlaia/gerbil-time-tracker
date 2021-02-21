@@ -66,11 +66,14 @@ body {
   margin-right: 0.5rem;
 }
 
-.card {
+.scrollable {
   overflow-y: auto;
+  max-height: 35vh;
+}
+
+.card {
   border-color: $border-dark;
   background-color: $bg-light;
-  max-height: 75vh;
 
   .form-control {
     background-color: $bg;

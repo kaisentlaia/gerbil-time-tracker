@@ -30,7 +30,7 @@
 
     <div class="row flex-grow-1">
       <div class="col">
-        <div class="card h-100">
+        <div class="card scrollable h-100">
 
           <ul *ngIf="!openTask" class="list-group list-group-flush">
             <li class="list-group-item list-group-item-action list-group-item-light d-flex justify-content-between align-items-center" *ngFor="let task of todayTasks" (click)="selectTask(task)" (keyup.enter)="editTask()" (keyup.delete)="deleteTask()" [ngClass]="(selectedTask==task)?'active':''" tabindex="0" (dblclick)="editTask()">
@@ -83,7 +83,7 @@
             <p class="font-weight-bold mb-auto">{{totalHours}}h</p>
           </div>
         </div>
-        <div class="totals-overview overflow-auto">
+        <div class="totals-overview scrollable">
           <div class="row no-gutters" *ngFor="let taskTotal of totals">
             <div class="col-3 text-right text-truncate text-small pr-1">
               {{taskTotal[0].name}}
