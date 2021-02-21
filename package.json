@@ -22,6 +22,8 @@
     "@angular/platform-browser-dynamic": "~9.1.0",
     "@angular/router": "~9.1.0",
     "bootstrap": "^4.6.0",
+    "electron-reload": "^1.5.0",
+    "electron-store": "^7.0.2",
     "jquery": "^3.5.1",
     "ngx-electron": "^2.2.0",
     "rxjs": "~6.5.4",

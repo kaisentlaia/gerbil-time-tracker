@@ -1,45 +1,68 @@
-const {app, BrowserWindow, ipcMain} = require('electron')
-const url = require("url");
-const path = require("path");
-ipcMain.on('REQUEST_CHANNEL', (event, arg) =>
-  console.log('got a message from electron service','event', event, 'message', arg)
-);
+const {app, BrowserWindow, ipcMain} = require('electron');
+const url = require('url');
+const path = require('path');
+const Store = require('electron-store');
 
-let mainWindow
+// Enable live reload for Electron too
+require('electron-reload')(__dirname, {
+  // Note that the path to electron may vary according to the main file
+  electron: require(`${__dirname}/node_modules/electron`)
+});
 
-function createWindow () {
+let mainWindow;
+
+function createWindow() {
   mainWindow = new BrowserWindow({
     width: 800,
     height: 600,
     webPreferences: {
       nodeIntegration: true
     }
-  })
+  });
 
   mainWindow.loadURL(
     url.format({
       pathname: path.join(__dirname, `/dist/index.html`),
-      protocol: "file:",
+      protocol: 'file:',
       slashes: true
     })
   );
   // Open the DevTools.
-  mainWindow.webContents.openDevTools()
+  mainWindow.webContents.openDevTools();
 
-  mainWindow.on('closed', function () {
-    mainWindow = null
-  })
-  
-  mainWindow.removeMenu()
+  mainWindow.on('closed', () => {
+    mainWindow = null;
+  });
+
+  mainWindow.removeMenu();
 }
 
+function saveData(data) {
+  const store = new Store();
 
-app.on('ready', createWindow)
+  store.set('tasks', data);
+}
 
-app.on('window-all-closed', function () {
-  if (process.platform !== 'darwin') app.quit()
-})
+function loadData() {
+  const store = new Store();
 
-app.on('activate', function () {
-  if (mainWindow === null) createWindow()
-})
+  return store.get('tasks');
+}
+
+ipcMain.on('save', (event, arg) =>
+  saveData(arg)
+);
+
+ipcMain.on('load', (event, arg) =>
+  event.sender.send('loadResult', loadData())
+);
+
+app.on('ready', createWindow);
+
+app.on('window-all-closed', () => {
+  if (process.platform !== 'darwin') { app.quit(); }
+});
+
+app.on('activate', () => {
+  if (mainWindow === null) { createWindow(); }
+});
