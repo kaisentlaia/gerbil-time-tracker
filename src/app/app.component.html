@@ -2,10 +2,10 @@
   <main role="main" class="inner h-100 d-flex flex-column">
     
     <div class="form-inline mb-2">
-      <button type="button" class="btn btn-dark btn-sm mr-sm-1">&lt;</button>
-      <button type="button" class="btn btn-dark btn-sm mr-sm-1">Today</button>
-      <button type="button" class="btn btn-dark btn-sm mr-sm-1">&gt;</button>
-      <input type="date" class="form-control form-control-sm w-auto" value="{{date | date: 'MM/dd/yyyy'}}">    
+      <button type="button" class="btn btn-dark btn-sm mr-sm-1" (click)="dayBefore()">&lt;</button>
+      <button type="button" class="btn btn-dark btn-sm mr-sm-1" (click)="setDate(null)">Today</button>
+      <button type="button" class="btn btn-dark btn-sm mr-sm-1" (click)="dayAfter()">&gt;</button>
+      <input type="date" name="selectedDate" class="form-control form-control-sm w-auto" [ngModel] ="selectedDate | date:'yyyy-MM-dd'" (change)="datePicker($event);">    
     </div>
 
     <div class="d-flex align-items-center">
@@ -33,7 +33,7 @@
         <div class="card h-100">
 
           <ul *ngIf="!openTask" class="list-group list-group-flush">
-            <li class="list-group-item list-group-item-action list-group-item-light d-flex justify-content-between align-items-center" *ngFor="let task of tasks">
+            <li class="list-group-item list-group-item-action list-group-item-light d-flex justify-content-between align-items-center" *ngFor="let task of todayTasks">
               <span class="hours">{{task.start | date: 'HH:mm'}} - {{task.end | date: 'HH:mm'}}</span>
               <span class="text-truncate flex-grow-1">{{task.name}}</span>
               <span class="badge badge-dark badge-pill">{{getDurationPill(task)}}</span>
@@ -79,21 +79,21 @@
             <h4>Totals</h4>          
           </div>
           <div class="col-3 text-right">
-            <p class="font-weight-bold mb-auto">4.75h</p>
+            <p class="font-weight-bold mb-auto">{{totalHours}}h</p>
           </div>
         </div>
         <div class="totals-overview overflow-auto">
-          <div class="row no-gutters">
+          <div class="row no-gutters" *ngFor="let taskTotal of totals | keyvalue">
             <div class="col-3 text-right text-truncate text-small pr-1">
-              Code writing
+              {{taskTotal.key}}
             </div>
             <div class="col">
               <div class="progress bg-dark mb-1">
-                <div class="progress-bar text-right bg-secondary p-1" role="progressbar" style="width: 100%" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100">1.5</div>
+                <div class="progress-bar text-right bg-secondary p-1" role="progressbar" style="width: 100%" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100">{{millisToDecH(taskTotal.value.total)}}</div>
               </div>          
             </div>
           </div>
-          <div class="row no-gutters">
+          <!-- <div class="row no-gutters">
             <div class="col-3 text-right text-truncate text-small pr-1">
               Licking bootstrap
             </div>
@@ -122,7 +122,7 @@
                 <div class="progress-bar text-right bg-secondary p-1" role="progressbar" style="width: 50%" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100">0.75</div>
               </div>          
             </div>
-          </div>
+          </div> -->
         </div>
         
       </div>
