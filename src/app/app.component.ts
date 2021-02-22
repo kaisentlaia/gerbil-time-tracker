@@ -69,6 +69,7 @@ export class AppComponent implements AfterViewInit {
   getTodayTasks() {
     // console.log('selected date:', this.selectedDate);
     // console.log('tasks', this.tasks);
+    this.activeTask = undefined;
     this.todayTasks = this.tasks.filter( (task) => {
       const dayEnd = new Date(this.selectedDate.getTime());
       dayEnd.setHours(23);
