@@ -25,7 +25,7 @@ export class AppComponent implements AfterViewInit {
   selectedDate: Date;
   totals: any[];
   totalHours: any;
-  allowGaps: boolean;
+  useMagic: boolean;
 
   constructor(
     public electronService: ElectronService,
@@ -42,7 +42,7 @@ export class AppComponent implements AfterViewInit {
         }
       }
     );
-    this.allowGaps = false;
+    this.useMagic = false;
   }
 
   ngAfterViewInit() {
@@ -55,7 +55,58 @@ export class AppComponent implements AfterViewInit {
       });
     } else {
       // console.log('browser app');
-      this.loadData([]);
+      this.loadData([
+        {
+          name: 'yesterday',
+          start: new Date('2021-02-20T11:13:00.000Z'),
+          end: new Date('2021-02-20T11:13:00.000Z')
+        },
+        {
+          name: 'uno',
+          start: new Date('2021-02-21T11:13:00.000Z'),
+          end: new Date('2021-02-21T12:19:00.000Z')
+        },
+        {
+          name: 'due',
+          start: new Date('2021-02-21T12:19:00.000Z'),
+          end: new Date('2021-02-21T15:30:00.000Z')
+        },
+        {
+          name: 'anotherthing',
+          start: new Date('2021-02-21T15:30:00.000Z'),
+          end: new Date('2021-02-21T15:32:00.000Z')
+        },
+        {
+          name: 'zzzzz',
+          start: new Date('2021-02-21T15:32:00.000Z'),
+          end: new Date('2021-02-21T15:51:00.000Z')
+        },
+        {
+          name: 'anotherthing',
+          start: new Date('2021-02-21T15:51:00.000Z'),
+          end: new Date('2021-02-21T16:06:00.000Z')
+        },
+        {
+          name: 'zzzzz',
+          start: new Date('2021-02-21T16:06:00.000Z'),
+          end: new Date('2021-02-21T16:54:00.000Z')
+        },
+        {
+          name: 'uno',
+          start: new Date('2021-02-21T16:54:00.000Z'),
+          end: new Date('2021-02-21T17:12:00.000Z')
+        },
+        {
+          name: 'nuovo',
+          start: new Date('2021-02-21T17:12:00.000Z'),
+          end: new Date('2021-02-21T17:20:00.000Z')
+        },
+        {
+          name: 'uno',
+          start: new Date('2021-02-21T17:20:00.000Z'),
+          end: null
+        }
+      ]);
     }
   }
 
@@ -309,81 +360,83 @@ export class AppComponent implements AfterViewInit {
       savedTask.end = savedTask.start;
     }
 
-    // first, let's process all the past events in reverse order
-    let savedFound = false;
-    this.todayTasks.reverse().map( (task, index) => {
-      const prevIndex = index + 1;
-      const nextIndex = index - 1;
-      const prevTask = prevIndex < this.todayTasks.length ? this.todayTasks[prevIndex] : null;
-      const nextTask = nextIndex >= 0 ? this.todayTasks[nextIndex] : null;
-      const prevIsSelected = prevTask === savedTask;
-      const isSelected = task === savedTask;
-      const nextIsSelected = nextTask === savedTask;
-      if (!savedFound) {
-        savedFound = isSelected;
-      } else {
-
-        if ((!this.allowGaps && task.start > prevTask?.end) || task.start < prevTask?.end) {
-          if (prevIsSelected) {
-            task.start = prevTask.end;
-          } else {
-            prevTask.end = task.start;
+    if (this.useMagic) {
+      // first, let's process all the past events in reverse order
+      let savedFound = false;
+      this.todayTasks.reverse().map( (task, index) => {
+        const prevIndex = index + 1;
+        const nextIndex = index - 1;
+        const prevTask = prevIndex < this.todayTasks.length ? this.todayTasks[prevIndex] : null;
+        const nextTask = nextIndex >= 0 ? this.todayTasks[nextIndex] : null;
+        const prevIsSelected = prevTask === savedTask;
+        const isSelected = task === savedTask;
+        const nextIsSelected = nextTask === savedTask;
+        if (!savedFound) {
+          savedFound = isSelected;
+        } else {
+  
+          if (task.start > prevTask?.end || task.start < prevTask?.end) {
+            if (prevIsSelected) {
+              task.start = prevTask.end;
+            } else {
+              prevTask.end = task.start;
+            }
+          }
+          if (task.end && (task.end < nextTask?.start || task.end > nextTask?.start)) {
+            if (nextIsSelected) {
+              task.end = nextTask.start;
+            } else {
+              nextTask.start = task.end;
+            }
+          }
+  
+          if (task.start > task.end) {
+            task.end = task.start;
+          }
+  
+          if (!this.useMagic && task.start === task.end) {
+            this.todayTasks.splice(index, 1);
           }
         }
-        if (task.end && ((!this.allowGaps && task.end < nextTask?.start) || task.end > nextTask?.start)) {
-          if (nextIsSelected) {
-            task.end = nextTask.start;
-          } else {
-            nextTask.start = task.end;
+      });
+  
+      savedFound = false;
+      this.todayTasks.reverse().map( (task, index) => {
+        const prevIndex = index - 1;
+        const nextIndex = index + 1;
+        const prevTask = prevIndex >= 0 ? this.todayTasks[prevIndex] : null;
+        const nextTask = nextIndex < this.todayTasks.length ? this.todayTasks[nextIndex] : null;
+        const prevIsSelected = prevTask === savedTask;
+        const isSelected = task === savedTask;
+        const nextIsSelected = nextTask === savedTask;
+        if (!savedFound) {
+          savedFound = isSelected;
+        } else {
+  
+          if ( task.start > prevTask?.end || task.start < prevTask?.end) {
+            if (prevIsSelected) {
+              prevTask.end = task.start;
+            } else {
+              task.start = prevTask.end;
+            }
+          }
+          if (task.end && (task.end < nextTask?.start || task.end > nextTask?.start)) {
+            if (nextIsSelected) {
+              task.end = nextTask.start;
+            } else {
+              nextTask.start = task.end;
+            }
+          }
+          if (task.end && task.start > task.end) {
+            task.end = task.start;
+          }
+  
+          if (!this.useMagic && task.start === task.end) {
+            this.todayTasks.splice(index, 1);
           }
         }
-
-        if (task.start > task.end) {
-          task.end = task.start;
-        }
-
-        if (!this.allowGaps && task.start === task.end) {
-          this.todayTasks.splice(index, 1);
-        }
-      }
-    });
-
-    savedFound = false;
-    this.todayTasks.reverse().map( (task, index) => {
-      const prevIndex = index - 1;
-      const nextIndex = index + 1;
-      const prevTask = prevIndex >= 0 ? this.todayTasks[prevIndex] : null;
-      const nextTask = nextIndex < this.todayTasks.length ? this.todayTasks[nextIndex] : null;
-      const prevIsSelected = prevTask === savedTask;
-      const isSelected = task === savedTask;
-      const nextIsSelected = nextTask === savedTask;
-      if (!savedFound) {
-        savedFound = isSelected;
-      } else {
-
-        if ((!this.allowGaps && task.start > prevTask?.end) || task.start < prevTask?.end) {
-          if (prevIsSelected) {
-            prevTask.end = task.start;
-          } else {
-            task.start = prevTask.end;
-          }
-        }
-        if (task.end && ((!this.allowGaps && task.end < nextTask?.start) || task.end > nextTask?.start)) {
-          if (nextIsSelected) {
-            task.end = nextTask.start;
-          } else {
-            nextTask.start = task.end;
-          }
-        }
-        if (task.end && task.start > task.end) {
-          task.end = task.start;
-        }
-
-        if (!this.allowGaps && task.start === task.end) {
-          this.todayTasks.splice(index, 1);
-        }
-      }
-    });
+      });
+    }
 
     this.clearSelection();
     this.saveData();

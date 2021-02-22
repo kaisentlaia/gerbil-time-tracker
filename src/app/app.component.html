@@ -11,7 +11,7 @@
           <input type="date" name="selectedDate" class="form-control form-control-sm w-auto" [ngModel] ="selectedDate | date:'yyyy-MM-dd'" (change)="datePicker($event);"> 
         </div>
         <div>
-          <button type="button" class="btn btn-dark btn-sm mr-sm-1" [ngClass]="!allowGaps?'active':''" (click)="allowGaps = !allowGaps"><fa-icon [icon]="faMagic"></fa-icon></button>
+          <button type="button" class="btn btn-dark btn-sm mr-sm-1" [ngClass]="useMagic?'active':''" (click)="useMagic = !useMagic"><fa-icon [icon]="faMagic"></fa-icon></button>
         </div>   
       </div>
   
