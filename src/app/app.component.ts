@@ -17,7 +17,7 @@ export class AppComponent implements AfterViewInit {
   todayTasks: Task[];
   activeTask: Task;
   selectedTask: Task;
-  openTask: Task;
+  openTask: any;
   newTask: string;
   selectedDate: Date;
   totals: any[];
@@ -260,25 +260,55 @@ export class AppComponent implements AfterViewInit {
   }
 
   editTask() {
-    this.openTask = this.selectedTask;
+    this.openTask = {
+      name: this.selectedTask.name,
+      startTime: this.selectedTask.start.getHours() + ':' + this.selectedTask.start.getMinutes(),
+      endTime: null
+    };
+    if (this.selectedTask.end) {
+      this.openTask.endTime = this.selectedTask.end.getHours() + ':' + this.selectedTask.end.getMinutes();
+    }
     console.log('editing task', this.openTask);
   }
 
-  deleteTask() {
-    console.log('deleting task', this.openTask);
-    const indexGlobal = this.tasks.indexOf(this.selectedTask);
-    const index = this.todayTasks.indexOf(this.selectedTask);
-    if (indexGlobal > -1) {
-      this.tasks.splice(indexGlobal, 1);
+  saveTask() {
+    console.log('saving task', this.openTask);
+    this.selectedTask.name = this.openTask.name;
+    this.openTask.startTime = this.openTask.startTime.toString();
+    this.openTask.endTime = this.openTask.startTime.toString();
+    if (this.openTask.startTime.match(/[0-9]{2}:[0-9]{2}/)) {
+      const startTime = this.openTask.startTime.split(':');
+      console.log('startTime', startTime);
+      this.selectedTask.start.setHours(startTime[0]);
+      this.selectedTask.start.setMinutes(startTime[1]);
     }
-    if (index > -1) {
-      this.todayTasks.splice(index, 1);
+    if (this.openTask.endTime.match(/[0-9]{2}:[0-9]{2}/)) {
+      const endTime = this.openTask.endTime.split(':');
+      console.log('endTime', endTime);
+      if (!this.selectedTask.end) {
+        this.selectedTask.end = new Date(this.selectedTask.start.getTime());
+      }
+      this.selectedTask.start.setHours(endTime[0]);
+      this.selectedTask.start.setMinutes(endTime[1]);
     }
     this.clearSelection();
     this.saveData();
   }
 
-  saveTask() {
+  getTaskIndex(task: Task) {
+    const foundIndex = this.tasks.indexOf(this.selectedTask);
+    const foundTodayIndex = this.todayTasks.indexOf(this.selectedTask);
+    return {index: foundIndex, todayIndex: foundTodayIndex};
+  }
+
+  deleteTask() {
+    const indexes = this.getTaskIndex(this.selectedTask);
+    if (indexes.index > -1) {
+      this.tasks.splice(indexes.index, 1);
+    }
+    if (indexes.todayIndex > -1) {
+      this.todayTasks.splice(indexes.todayIndex, 1);
+    }
     this.clearSelection();
     this.saveData();
   }

@@ -51,17 +51,17 @@
                 <div class="form-group row">
                   <label class="col-sm-1 col-form-label col-form-label-sm text-right">Task</label>
                   <div class="col-sm-11">
-                    <input type="text" class="form-control form-control-sm" [value]="openTask.name">
+                    <input type="text" class="form-control form-control-sm" [(ngModel)]="openTask.name" [value]="openTask.name" name="name">
                   </div>
                 </div>
                 <div class="form-group row">
                   <label class="col-sm-1 col-form-label col-form-label-sm text-right">Start at</label>
                   <div class="col-sm-5">
-                    <input type="time" class="form-control form-control-sm" [value]="openTask.start.getHours()+':'+openTask.start.getMinutes()">
+                    <input type="time" class="form-control form-control-sm" [(ngModel)]="openTask.startTime" [value]="openTask.startTime" name="startTime">
                   </div>
                   <label class="col-sm-1 col-form-label col-form-label-sm text-right">End at</label>
                   <div class="col-sm-5">
-                    <input type="time" class="form-control form-control-sm" [value]="openTask.end?.getHours()+':'+openTask.end?.getMinutes()">
+                    <input type="time" class="form-control form-control-sm" [(ngModel)]="openTask.endTime" [value]="openTask.endTime" name="endTime">
                   </div>
                 </div>
                 <div class="form-group row">
