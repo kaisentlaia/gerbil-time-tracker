@@ -1,7 +1,10 @@
+
 {
   "name": "gerbil",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "main": "main.ts",
+  "description": "A simple time tracker",
+  "author": "Kaisentlaia <kaisentlaia@gmail.com>",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
@@ -9,7 +12,50 @@
     "test": "ng test",
     "lint": "ng lint",
     "e2e": "ng e2e",
-    "start:electron": "ng build --base-href ./ && electron ."
+    "start:electron": "ng build --base-href ./ && electron .",
+    "pack": "build --dir",
+    "dist": "build",
+    "pack-win": "electron-builder --dir --win",
+    "dist-win": "electron-builder --win",
+    "pack-linux": "electron-builder --dir --linux",
+    "dist-linux": "electron-builder --linux"
+  },
+  "build": {
+    "appId": "gerbil.time.tracker",
+    "files": [
+      "dist/**/*",
+      "node_modules/**/*",
+      "package.json",
+      "main.ts"
+    ],
+    "mac": {
+      "category": "public.app-category.productivity"
+    },
+    "dmg": {
+      "contents": [
+        {
+          "x": 110,
+          "y": 150
+        },
+        {
+          "x": 240,
+          "y": 150,
+          "type": "link",
+          "path": "/Applications"
+        }
+      ]
+    },
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb",
+        "dir"
+      ]
+    },
+    "win": {
+      "target": "portable",
+      "icon": "dist/favicon.ico"
+    }
   },
   "private": true,
   "dependencies": {

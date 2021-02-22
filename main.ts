@@ -3,11 +3,11 @@ const url = require('url');
 const path = require('path');
 const Store = require('electron-store');
 
-// Enable live reload for Electron too
-require('electron-reload')(__dirname, {
-  // Note that the path to electron may vary according to the main file
-  electron: require(`${__dirname}/node_modules/electron`)
-});
+// // Enable live reload for Electron too
+// require('electron-reload')(__dirname, {
+//   // Note that the path to electron may vary according to the main file
+//   electron: require(`${__dirname}/node_modules/electron`)
+// });
 
 let mainWindow;
 
