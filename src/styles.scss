@@ -68,7 +68,16 @@ body {
 
 .scrollable {
   overflow-y: auto;
-  max-height: 35vh;
+  overflow-x: hidden;
+  // max-height: 35vh;
+}
+
+.task-list {
+  height: 50%;
+}
+
+.totals {
+  max-height: 50%;
 }
 
 .card {
