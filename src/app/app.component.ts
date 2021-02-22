@@ -2,7 +2,7 @@ import { Component, AfterViewInit, NgZone } from '@angular/core';
 import { Task } from './task.model';
 import { Observable, interval, Subscription } from 'rxjs';
 import { ElectronService } from 'ngx-electron';
-
+import { faMagic, faCaretRight, faCaretLeft } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
   selector: 'app-root',
@@ -12,6 +12,9 @@ import { ElectronService } from 'ngx-electron';
 export class AppComponent implements AfterViewInit {
   title = 'gerbil';
   private updateSubscription: Subscription;
+  faMagic = faMagic;
+  faCaretRight = faCaretRight;
+  faCaretLeft = faCaretLeft;
 
   tasks: Task[];
   todayTasks: Task[];
@@ -22,6 +25,7 @@ export class AppComponent implements AfterViewInit {
   selectedDate: Date;
   totals: any[];
   totalHours: any;
+  allowGaps: boolean;
 
   constructor(
     public electronService: ElectronService,
@@ -38,6 +42,7 @@ export class AppComponent implements AfterViewInit {
         }
       }
     );
+    this.allowGaps = false;
   }
 
   ngAfterViewInit() {
@@ -66,11 +71,20 @@ export class AppComponent implements AfterViewInit {
     this.setDate(null);
   }
 
-  getTodayTasks() {
+  updateTodayTasks() {
     // console.log('selected date:', this.selectedDate);
     // console.log('tasks', this.tasks);
     this.activeTask = undefined;
-    this.todayTasks = this.tasks.filter( (task) => {
+    this.todayTasks = this.getTodayTasks();
+    // console.log('todayTasks', this.todayTasks);
+    if (this.todayTasks.length > 0 && this.todayTasks[this.todayTasks.length - 1].end === null) {
+      this.activeTask = this.todayTasks[this.todayTasks.length - 1];
+    }
+    this.updateTotals();
+  }
+
+  getTodayTasks() {
+    return this.tasks.filter( (task) => {
       const dayEnd = new Date(this.selectedDate.getTime());
       dayEnd.setHours(23);
       dayEnd.setMinutes(59);
@@ -78,11 +92,6 @@ export class AppComponent implements AfterViewInit {
       dayEnd.setMilliseconds(999);
       return task.start >= this.selectedDate && task.start <= dayEnd;
     });
-    // console.log('todayTasks', this.todayTasks);
-    if (this.todayTasks.length > 0 && this.todayTasks[this.todayTasks.length - 1].end === null) {
-      this.activeTask = this.todayTasks[this.todayTasks.length - 1];
-    }
-    this.updateTotals();
   }
 
   beginTask(newTask) {
@@ -109,7 +118,7 @@ export class AppComponent implements AfterViewInit {
     if (this.electronService.isElectronApp) {
       this.electronService.ipcRenderer.send('save', this.tasks);
     }
-    this.getTodayTasks();
+    this.updateTodayTasks();
   }
 
   switchTask(newTask) {
@@ -182,7 +191,7 @@ export class AppComponent implements AfterViewInit {
     newDate.setSeconds(0);
     newDate.setMilliseconds(0);
     this.selectedDate = newDate;
-    this.getTodayTasks();
+    this.updateTodayTasks();
   }
 
   dayBefore() {
@@ -262,7 +271,7 @@ export class AppComponent implements AfterViewInit {
   editTask() {
     this.openTask = {
       name: this.selectedTask.name,
-      startTime: this.selectedTask.start.getHours() + ':' + this.selectedTask.start.getMinutes(),
+      startTime: this.zeroPad(this.selectedTask.start.getHours(), 2) + ':' + this.zeroPad(this.selectedTask.start.getMinutes(), 2),
       endTime: null
     };
     if (this.selectedTask.end) {
@@ -273,24 +282,109 @@ export class AppComponent implements AfterViewInit {
 
   saveTask() {
     console.log('saving task', this.openTask);
-    this.selectedTask.name = this.openTask.name;
+    // new object to avoid overwriting problems
+    const savedTask = this.selectedTask;
+
+    // parsing form data
+    savedTask.name = this.openTask.name;
     this.openTask.startTime = this.openTask.startTime.toString();
-    this.openTask.endTime = this.openTask.startTime.toString();
+    this.openTask.endTime = this.openTask.endTime.toString();
     if (this.openTask.startTime.match(/[0-9]{2}:[0-9]{2}/)) {
       const startTime = this.openTask.startTime.split(':');
-      console.log('startTime', startTime);
-      this.selectedTask.start.setHours(startTime[0]);
-      this.selectedTask.start.setMinutes(startTime[1]);
+      savedTask.start.setHours(startTime[0]);
+      savedTask.start.setMinutes(startTime[1]);
     }
     if (this.openTask.endTime.match(/[0-9]{2}:[0-9]{2}/)) {
       const endTime = this.openTask.endTime.split(':');
-      console.log('endTime', endTime);
-      if (!this.selectedTask.end) {
-        this.selectedTask.end = new Date(this.selectedTask.start.getTime());
+      if (!savedTask.end) {
+        savedTask.end = new Date(savedTask.start.getTime());
       }
-      this.selectedTask.start.setHours(endTime[0]);
-      this.selectedTask.start.setMinutes(endTime[1]);
+      savedTask.end.setHours(endTime[0]);
+      savedTask.end.setMinutes(endTime[1]);
+      this.activeTask = undefined;
+    } else {
+      savedTask.end = null;
     }
+    if (savedTask.start > savedTask.end) {
+      savedTask.end = savedTask.start;
+    }
+
+    // first, let's process all the past events in reverse order
+    let savedFound = false;
+    this.todayTasks.reverse().map( (task, index) => {
+      const prevIndex = index + 1;
+      const nextIndex = index - 1;
+      const prevTask = prevIndex < this.todayTasks.length ? this.todayTasks[prevIndex] : null;
+      const nextTask = nextIndex >= 0 ? this.todayTasks[nextIndex] : null;
+      const prevIsSelected = prevTask === savedTask;
+      const isSelected = task === savedTask;
+      const nextIsSelected = nextTask === savedTask;
+      if (!savedFound) {
+        savedFound = isSelected;
+      } else {
+
+        if ((!this.allowGaps && task.start > prevTask?.end) || task.start < prevTask?.end) {
+          if (prevIsSelected) {
+            task.start = prevTask.end;
+          } else {
+            prevTask.end = task.start;
+          }
+        }
+        if (task.end && ((!this.allowGaps && task.end < nextTask?.start) || task.end > nextTask?.start)) {
+          if (nextIsSelected) {
+            task.end = nextTask.start;
+          } else {
+            nextTask.start = task.end;
+          }
+        }
+
+        if (task.start > task.end) {
+          task.end = task.start;
+        }
+
+        if (!this.allowGaps && task.start === task.end) {
+          this.todayTasks.splice(index, 1);
+        }
+      }
+    });
+
+    savedFound = false;
+    this.todayTasks.reverse().map( (task, index) => {
+      const prevIndex = index - 1;
+      const nextIndex = index + 1;
+      const prevTask = prevIndex >= 0 ? this.todayTasks[prevIndex] : null;
+      const nextTask = nextIndex < this.todayTasks.length ? this.todayTasks[nextIndex] : null;
+      const prevIsSelected = prevTask === savedTask;
+      const isSelected = task === savedTask;
+      const nextIsSelected = nextTask === savedTask;
+      if (!savedFound) {
+        savedFound = isSelected;
+      } else {
+
+        if ((!this.allowGaps && task.start > prevTask?.end) || task.start < prevTask?.end) {
+          if (prevIsSelected) {
+            prevTask.end = task.start;
+          } else {
+            task.start = prevTask.end;
+          }
+        }
+        if (task.end && ((!this.allowGaps && task.end < nextTask?.start) || task.end > nextTask?.start)) {
+          if (nextIsSelected) {
+            task.end = nextTask.start;
+          } else {
+            nextTask.start = task.end;
+          }
+        }
+        if (task.end && task.start > task.end) {
+          task.end = task.start;
+        }
+
+        if (!this.allowGaps && task.start === task.end) {
+          this.todayTasks.splice(index, 1);
+        }
+      }
+    });
+
     this.clearSelection();
     this.saveData();
   }

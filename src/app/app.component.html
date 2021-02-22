@@ -3,11 +3,16 @@
     
     <div>
 
-      <div class="form-inline mb-2">
-        <button type="button" class="btn btn-dark btn-sm mr-sm-1" (click)="dayBefore()">&lt;</button>
-        <button type="button" class="btn btn-dark btn-sm mr-sm-1" (click)="setDate(null)">Today</button>
-        <button type="button" class="btn btn-dark btn-sm mr-sm-1" (click)="dayAfter()">&gt;</button>
-        <input type="date" name="selectedDate" class="form-control form-control-sm w-auto" [ngModel] ="selectedDate | date:'yyyy-MM-dd'" (change)="datePicker($event);">    
+      <div class="form-inline mb-2 d-flex align-items-center">
+        <div class="flex-grow-1">
+          <button type="button" class="btn btn-dark btn-sm mr-sm-1" (click)="dayBefore()"><fa-icon [icon]="faCaretLeft"></fa-icon></button>
+          <button type="button" class="btn btn-dark btn-sm mr-sm-1" (click)="setDate(null)">Today</button>
+          <button type="button" class="btn btn-dark btn-sm mr-sm-1" (click)="dayAfter()"><fa-icon [icon]="faCaretRight"></fa-icon></button>
+          <input type="date" name="selectedDate" class="form-control form-control-sm w-auto" [ngModel] ="selectedDate | date:'yyyy-MM-dd'" (change)="datePicker($event);"> 
+        </div>
+        <div>
+          <button type="button" class="btn btn-dark btn-sm mr-sm-1" [ngClass]="!allowGaps?'active':''" (click)="allowGaps = !allowGaps"><fa-icon [icon]="faMagic"></fa-icon></button>
+        </div>   
       </div>
   
       <div class="d-flex align-items-center">
