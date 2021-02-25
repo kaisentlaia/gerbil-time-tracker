@@ -1,20 +1,25 @@
-import { Component, AfterViewInit, NgZone } from '@angular/core';
+import { Component, AfterViewChecked, NgZone, ViewChild, ElementRef } from '@angular/core';
 import { Task } from './task.model';
 import { Observable, interval, Subscription } from 'rxjs';
 import { ElectronService } from 'ngx-electron';
-import { faMagic, faCaretRight, faCaretLeft } from '@fortawesome/free-solid-svg-icons';
+import { faMagic, faCaretRight, faCaretLeft, faCalendar, faCalendarAlt, faCalendarCheck } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss']
 })
-export class AppComponent implements AfterViewInit {
+export class AppComponent implements AfterViewChecked {
   title = 'gerbil';
   private updateSubscription: Subscription;
+  @ViewChild('taskNameNew') taskNameNew: ElementRef;
+  @ViewChild('taskNameEdit') taskNameEdit: ElementRef;
   faMagic = faMagic;
   faCaretRight = faCaretRight;
   faCaretLeft = faCaretLeft;
+  faCalendar = faCalendar;
+  faCalendarAlt = faCalendarAlt;
+  faCalendarCheck = faCalendarCheck;
 
   debugLevel = 1;
 
@@ -28,6 +33,11 @@ export class AppComponent implements AfterViewInit {
   totals: any[];
   totalHours: any;
   useMagic: boolean;
+  filterDays: number;
+
+  FILTER_ALL = 0;
+  FILTER_EMPTY = 1;
+  FILTER_FULL = 2;
 
   constructor(
     public electronService: ElectronService,
@@ -45,9 +55,7 @@ export class AppComponent implements AfterViewInit {
       }
     );
     this.useMagic = true;
-  }
-
-  ngAfterViewInit() {
+    this.filterDays = this.FILTER_ALL;
     // this.debug('this.electronService.isElectronApp', this.electronService.isElectronApp);
     if (this.electronService.isElectronApp) {
       // this.debug('electron app');
@@ -112,6 +120,12 @@ export class AppComponent implements AfterViewInit {
     }
   }
 
+  ngAfterViewChecked() {
+    if (this.openTask) {
+      this.taskNameEdit.nativeElement.focus();
+    }
+  }
+
   loadData(tasks: Task[]) {
     this.debug(['loadData', tasks], 3);
     this.tasks = tasks.map((item: Task) => {
@@ -125,31 +139,28 @@ export class AppComponent implements AfterViewInit {
   }
 
   updateTodayTasks() {
-    this.debug(["updateTodayTasks"],3);
-    // this.debug('selected date:', this.selectedDate);
-    // this.debug('tasks', this.tasks);
+    this.debug(['updateTodayTasks'], 3);
     this.activeTask = undefined;
-    this.todayTasks = this.getTodayTasks();
-    // this.debug('todayTasks', this.todayTasks);
+    this.todayTasks = this.getDayTasks(this.selectedDate);
     if (this.todayTasks.length > 0 && this.todayTasks[this.todayTasks.length - 1].end === null) {
       this.activeTask = this.todayTasks[this.todayTasks.length - 1];
     }
     this.updateTotals();
   }
 
-  getTodayTasks() {
+  getDayTasks(date: Date) {
     return this.tasks.filter( (task) => {
-      const dayEnd = new Date(this.selectedDate.getTime());
+      const dayEnd = new Date(date.getTime());
       dayEnd.setHours(23);
       dayEnd.setMinutes(59);
       dayEnd.setSeconds(59);
       dayEnd.setMilliseconds(999);
-      return task.start >= this.selectedDate && task.start <= dayEnd;
+      return task.start >= date && task.start <= dayEnd;
     });
   }
 
   beginTask(newTask) {
-    this.debug(["beginTask"],3);
+    this.debug(['beginTask'], 3);
     if (typeof(newTask) !== 'undefined' && newTask && newTask !== '') {
       const now = new Date();
       now.setDate(this.selectedDate.getDate());
@@ -170,7 +181,7 @@ export class AppComponent implements AfterViewInit {
   }
 
   saveData() {
-    this.debug(["saveData"],3);
+    this.debug(['saveData'], 3);
     if (this.electronService.isElectronApp) {
       this.electronService.ipcRenderer.send('save', this.tasks);
     }
@@ -178,7 +189,7 @@ export class AppComponent implements AfterViewInit {
   }
 
   switchTask(newTask) {
-    this.debug(["switchTask"],3);
+    this.debug(['switchTask'], 3);
     if (typeof(newTask) !== 'undefined' && newTask && newTask !== '') {
       if (typeof(this.activeTask) !== 'undefined') { this.endTask(); }
       this.beginTask(newTask);
@@ -186,8 +197,8 @@ export class AppComponent implements AfterViewInit {
   }
 
   endTask() {
-    this.debug(["endTask"],3);
-    let dayEnd = new Date(this.selectedDate.getTime());
+    this.debug(['endTask'], 3);
+    const dayEnd = new Date(this.selectedDate.getTime());
     dayEnd.setHours(23);
     dayEnd.setMinutes(59);
     dayEnd.setSeconds(59);
@@ -195,7 +206,7 @@ export class AppComponent implements AfterViewInit {
     let now = new Date();
     now.setSeconds(0);
     now.setMilliseconds(0);
-    if(dayEnd<now) {
+    if (dayEnd < now) {
       now = dayEnd;
     }
     this.tasks.find(x => x.name === this.activeTask.name && x.start === this.activeTask.start && x.end === this.activeTask.end ).end = now;
@@ -259,22 +270,49 @@ export class AppComponent implements AfterViewInit {
     newDate.setMilliseconds(0);
     this.selectedDate = newDate;
     this.updateTodayTasks();
+    this.taskNameNew?.nativeElement.focus();
   }
 
   dayBefore() {
     const dayBefore = new Date(this.selectedDate.getTime());
     dayBefore.setDate(dayBefore.getDate() - 1);
     this.setDate(dayBefore);
+    if (this.filterDays !== this.FILTER_ALL) {
+      const yearStart = new Date(this.selectedDate.getTime());
+      yearStart.setMonth(0, 1);
+      let dayTasks = this.getDayTasks(dayBefore);
+      let found = this.filterDays === this.FILTER_FULL ? dayTasks.length > 0 : dayTasks.length === 0;
+      while (!found && dayBefore > yearStart) {
+        dayBefore.setDate(dayBefore.getDate() - 1);
+        this.debug(['checking', dayBefore], 1);
+        this.setDate(dayBefore);
+        dayTasks = this.getDayTasks(dayBefore);
+        found = this.filterDays === this.FILTER_FULL ? dayTasks.length > 0 : dayTasks.length === 0;
+      }
+    }
   }
 
   dayAfter() {
     const dayAfter = new Date(this.selectedDate.getTime());
     dayAfter.setDate(dayAfter.getDate() + 1);
     this.setDate(dayAfter);
+    if (this.filterDays !== this.FILTER_ALL) {
+      const yearEnd = new Date(this.selectedDate.getTime());
+      yearEnd.setMonth(11, 31);
+      let dayTasks = this.getDayTasks(dayAfter);
+      let found = this.filterDays === this.FILTER_FULL ? dayTasks.length > 0 : dayTasks.length === 0;
+      while (!found && dayAfter < yearEnd) {
+        dayAfter.setDate(dayAfter.getDate() + 1);
+        this.debug(['checking', dayAfter], 1);
+        this.setDate(dayAfter);
+        dayTasks = this.getDayTasks(dayAfter);
+        found = this.filterDays === this.FILTER_FULL ? dayTasks.length > 0 : dayTasks.length === 0;
+      }
+    }
   }
 
   updateTotals() {
-    this.debug(["updateTotals"],3);
+    this.debug(['updateTotals'], 3);
     const totals = {};
     // this.debug('updateTotals called, todayTasks ', this.todayTasks);
     let maxValue = 0;
@@ -333,7 +371,7 @@ export class AppComponent implements AfterViewInit {
 
   selectTask(task) {
     this.selectedTask = task;
-    this.debug(['selected task', task],3);
+    this.debug(['selected task', task], 3);
   }
 
   editTask() {
@@ -345,11 +383,11 @@ export class AppComponent implements AfterViewInit {
     if (this.selectedTask.end) {
       this.openTask.endTime = this.selectedTask.end.getHours() + ':' + this.selectedTask.end.getMinutes();
     }
-    this.debug(['editing task', this.openTask],3);
+    this.debug(['editing task', this.openTask], 3);
   }
 
   saveTask() {
-    this.debug(['saving task', this.openTask],3);
+    this.debug(['saving task', this.openTask], 3);
     // new object to avoid overwriting problems
     const savedTask = this.selectedTask;
 
@@ -384,14 +422,14 @@ export class AppComponent implements AfterViewInit {
         const prevIndex = index + 1;
         const prevTask = prevIndex < this.todayTasks.length ? this.todayTasks[prevIndex] : null;
         const isSelected = task === savedTask;
-        if(savedFound || isSelected) {
-          if(!savedFound) { savedFound = isSelected; }
+        if (savedFound || isSelected) {
+          if (!savedFound) { savedFound = isSelected; }
           if (task.end && task.start > task.end) {
-            this.debug(["task.start > task.end", task.start, task.end],3);
+            this.debug(['task.start > task.end', task.start, task.end], 3);
             task.end = new Date(task.start.getTime());
           }
-          if ( prevTask?.end && task.start.getTime() != prevTask?.end.getTime() ) {
-            this.debug(["task.end != prevTask?.start", task.end, prevTask?.start],1);
+          if ( prevTask && prevTask?.end && task.start.getTime() != prevTask?.end.getTime() ) {
+            this.debug(['task.end != prevTask?.start', task.end, prevTask?.start], 1);
             prevTask.end = new Date(task.start.getTime());
           }
         }
@@ -403,14 +441,14 @@ export class AppComponent implements AfterViewInit {
         const nextIndex = index + 1;
         const nextTask = nextIndex < this.todayTasks.length ? this.todayTasks[nextIndex] : null;
         const isSelected = task === savedTask;
-        if(savedFound || isSelected) {
-          if(!savedFound) { savedFound = isSelected; }
+        if (savedFound || isSelected) {
+          if (!savedFound) { savedFound = isSelected; }
           if (task.end && task.start > task.end) {
-            this.debug(["task.start > task.end", task.start, task.end],1);
+            this.debug(['task.start > task.end', task.start, task.end], 1);
             task.end = new Date(task.start.getTime());
           }
-          if(task.end && task.end.getTime() != nextTask?.start.getTime()) {
-            this.debug(["task.end != nextTask?.start", task.end, nextTask?.start],1);
+          if (nextTask && task.end && task.end.getTime() != nextTask?.start.getTime()) {
+            this.debug(['task.end != nextTask?.start', task.end, nextTask?.start], 1);
             nextTask.start = new Date(task.end.getTime());
           }
         }
@@ -449,7 +487,7 @@ export class AppComponent implements AfterViewInit {
   }
 
   private debug(messages, level) {
-    if(this.debugLevel>0 && level<=this.debugLevel) {
+    if (this.debugLevel > 0 && level <= this.debugLevel) {
       messages.map((message) => {
         console.debug(message);
       });

@@ -5,13 +5,16 @@
 
       <div class="form-inline mb-2 d-flex align-items-center">
         <div class="flex-grow-1">
-          <button type="button" class="btn btn-dark btn-sm mr-sm-1" (click)="dayBefore()"><fa-icon [icon]="faCaretLeft"></fa-icon></button>
-          <button type="button" class="btn btn-dark btn-sm mr-sm-1" (click)="setDate(null)">Today</button>
-          <button type="button" class="btn btn-dark btn-sm mr-sm-1" (click)="dayAfter()"><fa-icon [icon]="faCaretRight"></fa-icon></button>
-          <input type="date" name="selectedDate" class="form-control form-control-sm w-auto" [ngModel] ="selectedDate | date:'yyyy-MM-dd'" (change)="datePicker($event);"> 
+          <button type="button" class="btn btn-dark btn-sm mr-sm-1" (click)="dayBefore()" tabindex="1"><fa-icon [icon]="faCaretLeft"></fa-icon></button>
+          <button type="button" class="btn btn-dark btn-sm mr-sm-1" (click)="setDate(null)" tabindex="2">Today</button>
+          <button type="button" class="btn btn-dark btn-sm mr-sm-1" (click)="dayAfter()" tabindex="3"><fa-icon [icon]="faCaretRight"></fa-icon></button>
+          <input type="date" name="selectedDate" class="form-control form-control-sm w-auto mr-sm-1" [ngModel] ="selectedDate | date:'yyyy-MM-dd'" (change)="datePicker($event);" tabindex="4"> 
+          <button type="button" class="btn btn-dark btn-sm mr-sm-1" [ngClass]="filterDays==FILTER_ALL?'active':''" (click)="filterDays=FILTER_ALL" title="Cycle through all days"><fa-icon [icon]="faCalendarCheck"></fa-icon></button>
+          <button type="button" class="btn btn-dark btn-sm mr-sm-1" [ngClass]="filterDays==FILTER_FULL?'active':''" (click)="filterDays=FILTER_FULL" title="Cycle through non empty days only"><fa-icon [icon]="faCalendarAlt"></fa-icon></button>
+          <button type="button" class="btn btn-dark btn-sm mr-sm-1" [ngClass]="filterDays==FILTER_EMPTY?'active':''" (click)="filterDays=FILTER_EMPTY" title="Cycle through empty days only"><fa-icon [icon]="faCalendar"></fa-icon></button>
         </div>
         <div>
-          <button type="button" class="btn btn-dark btn-sm mr-sm-1" [ngClass]="useMagic?'active':''" (click)="useMagic = !useMagic"><fa-icon [icon]="faMagic"></fa-icon></button>
+          <button type="button" class="btn btn-dark btn-sm mr-sm-1" [ngClass]="useMagic?'active':''" (click)="useMagic = !useMagic" [title]="'Click to '+(useMagic?'disable':'enable')+' multiple task edit'" tabindex="5"><fa-icon [icon]="faMagic"></fa-icon></button>
         </div>   
       </div>
   
@@ -21,17 +24,17 @@
           <p class="font-weight-bold mb-auto">{{getDurationString(activeTask)}}</p>
         </div>
         <div class="text-right">
-          <button *ngIf="activeTask" type="button" class="btn btn-danger" (click)="endTask(); clearSelection();">Stop</button>
+          <button *ngIf="activeTask" type="button" class="btn btn-danger" (click)="endTask(); clearSelection();" tabindex="6">Stop</button>
         </div>
       </div>
   
       <div class="form-row pt-2 pb-3 pl-1 pr-1">
         <div class="flex-grow-1">
-          <input name="taskName" type="text" class="form-control" placeholder="Task name" [(ngModel)]="newTask" (keyup.enter)="switchTask(newTask)" (click)="clearSelection()">
+          <input name="taskName" type="text" class="form-control" placeholder="Task name" [(ngModel)]="newTask" (keyup.enter)="switchTask(newTask)" (click)="clearSelection()" tabindex="7"  #taskNameNew autofocus>
         </div>
         <div>
-          <button *ngIf="!activeTask" type="button" class="ml-2 btn btn-success" (click)="beginTask(newTask)" [disabled]="!newTask">Start</button>
-          <button *ngIf="activeTask" type="button" class="ml-2 btn btn-dark" (click)="switchTask(newTask)" [disabled]="!newTask">Switch</button>
+          <button *ngIf="!activeTask" type="button" class="ml-2 btn btn-success" (click)="beginTask(newTask)" [disabled]="!newTask" tabindex="8">Start</button>
+          <button *ngIf="activeTask" type="button" class="ml-2 btn btn-dark" (click)="switchTask(newTask)" [disabled]="!newTask" tabindex="9">Switch</button>
         </div>
       </div>
 
@@ -44,7 +47,7 @@
           <div class="card scrollable mh-100 h-100">
   
             <ul *ngIf="!openTask" class="list-group list-group-flush">
-              <li class="list-group-item list-group-item-action list-group-item-light d-flex justify-content-between align-items-center" *ngFor="let task of todayTasks" (click)="selectTask(task)" (keyup.enter)="editTask()" (keyup.delete)="deleteTask()" [ngClass]="(selectedTask==task)?'active':''" tabindex="0" (dblclick)="editTask()">
+              <li class="list-group-item list-group-item-action list-group-item-light d-flex justify-content-between align-items-center" *ngFor="let task of todayTasks; let i = index" (click)="selectTask(task)" (focus)="selectTask(task)" (keyup.enter)="editTask()" (keyup.delete)="deleteTask()" [ngClass]="(selectedTask==task)?'active':''" [tabindex]="i+10" (dblclick)="editTask()">
                 <span class="hours">{{task.start | date: 'HH:mm'}} - {{task.end | date: 'HH:mm'}}</span>
                 <span class="text-truncate flex-grow-1">{{task.name}}</span>
                 <span class="badge badge-dark badge-pill">{{getDurationPill(task)}}</span>
@@ -54,26 +57,26 @@
             <div *ngIf="openTask" class="card-body">
               <form>
                 <div class="form-group row">
-                  <label class="col-sm-1 col-form-label col-form-label-sm text-right">Task</label>
-                  <div class="col-sm-11">
-                    <input type="text" class="form-control form-control-sm" [(ngModel)]="openTask.name" [value]="openTask.name" name="name">
+                  <label class="col-2 col-form-label col-form-label-sm text-right">Task</label>
+                  <div class="col-10">
+                    <input type="text" class="form-control form-control-sm" [(ngModel)]="openTask.name" [value]="openTask.name" name="name" (keyup.enter)="saveTask()" (keyup.esc)="clearSelection()" tabindex="10" #taskNameEdit>
                   </div>
                 </div>
                 <div class="form-group row">
-                  <label class="col-sm-1 col-form-label col-form-label-sm text-right">Start at</label>
-                  <div class="col-sm-5">
-                    <input type="time" class="form-control form-control-sm" [(ngModel)]="openTask.startTime" [value]="openTask.startTime" name="startTime">
+                  <label class="col-2 col-form-label col-form-label-sm text-right">Start at</label>
+                  <div class="col-4">
+                    <input type="time" class="form-control form-control-sm" [(ngModel)]="openTask.startTime" [value]="openTask.startTime" name="startTime" (keyup.enter)="saveTask()" (keyup.esc)="clearSelection()" tabindex="11">
                   </div>
-                  <label class="col-sm-1 col-form-label col-form-label-sm text-right">End at</label>
-                  <div class="col-sm-5">
-                    <input type="time" class="form-control form-control-sm" [(ngModel)]="openTask.endTime" [value]="openTask.endTime" name="endTime">
+                  <label class="col-2 col-form-label col-form-label-sm text-right">End at</label>
+                  <div class="col-4">
+                    <input type="time" class="form-control form-control-sm" [(ngModel)]="openTask.endTime" [value]="openTask.endTime" name="endTime" (keyup.enter)="saveTask()" (keyup.esc)="clearSelection()" tabindex="12">
                   </div>
                 </div>
                 <div class="form-group row">
                   <div class="col text-right">
-                    <button type="button" class="btn btn-dark mr-1 btn-sm" (click)="clearSelection()">Cancel</button>
-                    <button type="button" class="btn btn-success mr-1 btn-sm" (click)="saveTask()">Save</button>
-                    <button type="button" class="btn btn-danger btn-sm" (click)="deleteTask()">Delete</button>
+                    <button type="button" class="btn btn-dark mr-1 btn-sm" (click)="clearSelection()" tabindex="13">Cancel</button>
+                    <button type="button" class="btn btn-success mr-1 btn-sm" (click)="saveTask()" tabindex="14">Save</button>
+                    <button type="button" class="btn btn-danger btn-sm" (click)="deleteTask()" tabindex="15">Delete</button>
                   </div>
                 </div>
               </form>
