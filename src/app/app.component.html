@@ -8,7 +8,7 @@
           <button type="button" class="btn btn-dark btn-sm mr-sm-1" (click)="dayBefore()" tabindex="1" title="Previous day"><fa-icon [icon]="faCaretLeft"></fa-icon></button>
           <button type="button" class="btn btn-dark btn-sm mr-sm-1" (click)="setDate(null)" tabindex="2" title="Today"><fa-icon [icon]="faCalendarDay"></fa-icon></button>
           <button type="button" class="btn btn-dark btn-sm mr-sm-1" (click)="dayAfter()" tabindex="3" title="Next day"><fa-icon [icon]="faCaretRight"></fa-icon></button>
-          <input type="date" name="selectedDate" class="form-control form-control-sm w-auto mr-sm-1" [ngModel] ="selectedDate | date:'yyyy-MM-dd'" (change)="datePicker($event);" tabindex="4"> 
+          <input type="date" name="selectedDate" class="form-control form-control-gerbil form-control-sm w-auto mr-sm-1" [ngModel] ="selectedDate | date:'yyyy-MM-dd'" (change)="datePicker($event);" tabindex="4"> 
           <button type="button" class="btn btn-dark btn-sm mr-sm-1" [ngClass]="filterDays==FILTER_ALL?'active':''" (click)="filterDays=FILTER_ALL" title="Cycle through all days"><fa-icon [icon]="faCalendarAlt"></fa-icon></button>
           <button type="button" class="btn btn-dark btn-sm mr-sm-1" [ngClass]="filterDays==FILTER_FULL?'active':''" (click)="filterDays=FILTER_FULL" title="Cycle through non empty days only"><fa-icon [icon]="faCalendarCheck"></fa-icon></button>
           <button type="button" class="btn btn-dark btn-sm mr-sm-1" [ngClass]="filterDays==FILTER_EMPTY?'active':''" (click)="filterDays=FILTER_EMPTY" title="Cycle through empty days only"><fa-icon [icon]="faCalendar"></fa-icon></button>
@@ -30,7 +30,7 @@
   
       <div class="form-row pt-2 pb-3 pl-1 pr-1">
         <div class="flex-grow-1">
-          <input name="taskName" type="text" class="form-control" placeholder="Task name" [(ngModel)]="newTask" (keyup.enter)="switchTask(newTask)" (click)="clearSelection()" (keyup.esc)="newTask=null" tabindex="7" #taskNameNew autofocus>
+          <input name="taskName" type="text" class="form-control form-control-gerbil" placeholder="Task name" [(ngModel)]="newTask" (keyup.enter)="switchTask(newTask)" (click)="clearSelection()" (keyup.esc)="newTask=null" tabindex="7" [ngbTypeahead]="search" #taskNameNew autofocus>
         </div>
         <div>
           <button *ngIf="!activeTask" type="button" class="ml-2 btn btn-success" (click)="beginTask(newTask)" [disabled]="!newTask" tabindex="8"><fa-icon [icon]="faPlay"></fa-icon></button>
@@ -47,7 +47,7 @@
           <div class="card scrollable mh-100 h-100">
   
             <ul *ngIf="!openTask" class="list-group list-group-flush">
-              <li class="list-group-item list-group-item-action list-group-item-light d-flex justify-content-between align-items-center" *ngFor="let task of todayTasks; let i = index" (click)="selectTask(task)" (focus)="selectTask(task)" (keyup.enter)="editTask()" (keyup.delete)="deleteTask()" (keyup.esc)="clearSelection()" [ngClass]="(selectedTask==task)?'active':''" [tabindex]="i+10" (dblclick)="editTask()">
+              <li class="list-group-item list-group-item-gerbil list-group-item-action list-group-item-dark d-flex justify-content-between align-items-center" *ngFor="let task of todayTasks; let i = index" (click)="selectTask(task)" (focus)="selectTask(task)" (keyup.enter)="editTask()" (keyup.delete)="deleteTask()" (keyup.esc)="clearSelection()" [ngClass]="(selectedTask==task)?'active':''" [tabindex]="i+10" (dblclick)="editTask()">
                 <span class="hours">{{task.start | date: 'HH:mm'}} - {{task.end | date: 'HH:mm'}}</span>
                 <span class="text-truncate flex-grow-1">{{task.name}}</span>
                 <span class="badge badge-dark badge-pill">{{getDurationPill(task)}}</span>
@@ -59,17 +59,17 @@
                 <div class="form-group row">
                   <label class="col-2 col-form-label col-form-label-sm text-right">Task</label>
                   <div class="col-10">
-                    <input type="text" class="form-control form-control-sm" [(ngModel)]="openTask.name" [value]="openTask.name" name="name" (keyup.enter)="saveTask()" (keyup.esc)="clearSelection()" tabindex="10" #taskNameEdit>
+                    <input type="text" class="form-control form-control-gerbil form-control-sm" [(ngModel)]="openTask.name" [value]="openTask.name" name="name" (keyup.enter)="saveTask()" (keyup.esc)="clearSelection()" tabindex="10" #taskNameEdit autofocus>
                   </div>
                 </div>
                 <div class="form-group row">
                   <label class="col-2 col-form-label col-form-label-sm text-right">Start at</label>
                   <div class="col-4">
-                    <input type="time" class="form-control form-control-sm" [(ngModel)]="openTask.startTime" [value]="openTask.startTime" name="startTime" (keyup.enter)="saveTask()" (keyup.esc)="clearSelection()" tabindex="11">
+                    <input type="time" class="form-control form-control-gerbil form-control-sm" [(ngModel)]="openTask.startTime" [value]="openTask.startTime" name="startTime" (keyup.enter)="saveTask()" (keyup.esc)="clearSelection()" tabindex="11">
                   </div>
                   <label class="col-2 col-form-label col-form-label-sm text-right">End at</label>
                   <div class="col-4">
-                    <input type="time" class="form-control form-control-sm" [(ngModel)]="openTask.endTime" [value]="openTask.endTime" name="endTime" (keyup.enter)="saveTask()" (keyup.esc)="clearSelection()" tabindex="12">
+                    <input type="time" class="form-control form-control-gerbil form-control-sm" [(ngModel)]="openTask.endTime" [value]="openTask.endTime" name="endTime" (keyup.enter)="saveTask()" (keyup.esc)="clearSelection()" tabindex="12">
                   </div>
                 </div>
                 <div class="form-group row">
@@ -104,7 +104,7 @@
               </div>
               <div class="col">
                 <div class="progress bg-dark mb-1">
-                  <div [ngClass]="(taskTotal[0].active)?'progress-bar-striped progress-bar-animated':''" class="progress-bar text-right bg-secondary p-1" role="progressbar" [style]="'width:' + taskTotal[0].percent +'%'" [attr.aria-valuenow]="taskTotal[0].percent" aria-valuemin="0" aria-valuemax="100">{{millisToDecH(taskTotal[0].total)}}h</div>
+                  <div [ngClass]="(taskTotal[0].active)?'progress-bar-striped progress-bar-animated':''" class="progress-bar progress-bar-gerbil text-right bg-secondary p-1" role="progressbar" [style]="'width:' + taskTotal[0].percent +'%'" [attr.aria-valuenow]="taskTotal[0].percent" aria-valuemin="0" aria-valuemax="100">{{millisToDecH(taskTotal[0].total)}}h</div>
                 </div>          
               </div>
             </div>

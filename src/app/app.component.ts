@@ -1,29 +1,41 @@
-import { Component, AfterViewChecked, NgZone, ViewChild, ElementRef, OnInit } from '@angular/core';
+import { Component, AfterViewChecked, NgZone, ViewChild, ElementRef, OnInit, ViewEncapsulation } from '@angular/core';
 import { Task } from './task.model';
 import { Observable, interval, Subscription } from 'rxjs';
+import {debounceTime, distinctUntilChanged, map} from 'rxjs/operators';
+
+
 import { ElectronService } from 'ngx-electron';
 import { faMagic, faCaretRight, faCaretLeft, faCalendar, faCalendarAlt, faCalendarCheck, faCalendarDay, faPlay, faStop, faRandom } from '@fortawesome/free-solid-svg-icons';
 
+let taskNames = [] as string[];
+
+const FILTER_ALL = 0;
+const FILTER_EMPTY = 1;
+const FILTER_FULL = 2;
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
-  styleUrls: ['./app.component.scss']
+  styleUrls: ['./app.component.scss'],
+  encapsulation: ViewEncapsulation.None
 })
 export class AppComponent implements AfterViewChecked, OnInit {
   title = 'gerbil';
   private updateSubscription: Subscription;
   @ViewChild('taskNameNew') taskNameNew: ElementRef;
   @ViewChild('taskNameEdit') taskNameEdit: ElementRef;
-  faMagic = faMagic;
-  faCaretRight = faCaretRight;
-  faCaretLeft = faCaretLeft;
-  faCalendar = faCalendar;
-  faCalendarAlt = faCalendarAlt;
-  faCalendarCheck = faCalendarCheck;
-  faCalendarDay = faCalendarDay;
-  faPlay = faPlay;
-  faStop = faStop;
-  faRandom = faRandom;
+  readonly FILTER_ALL = FILTER_ALL;
+  readonly FILTER_EMPTY = FILTER_EMPTY;
+  readonly FILTER_FULL = FILTER_FULL;
+  readonly faMagic = faMagic;
+  readonly faCaretRight = faCaretRight;
+  readonly faCaretLeft = faCaretLeft;
+  readonly faCalendar = faCalendar;
+  readonly faCalendarAlt = faCalendarAlt;
+  readonly faCalendarCheck = faCalendarCheck;
+  readonly faCalendarDay = faCalendarDay;
+  readonly faPlay = faPlay;
+  readonly faStop = faStop;
+  readonly faRandom = faRandom;
 
   debugLevel = 1;
 
@@ -38,10 +50,6 @@ export class AppComponent implements AfterViewChecked, OnInit {
   totalHours: any;
   useMagic: boolean;
   filterDays: number;
-
-  FILTER_ALL = 0;
-  FILTER_EMPTY = 1;
-  FILTER_FULL = 2;
 
   constructor(
     public electronService: ElectronService,
@@ -59,7 +67,7 @@ export class AppComponent implements AfterViewChecked, OnInit {
       }
     );
     this.useMagic = true;
-    this.filterDays = this.FILTER_ALL;
+    this.filterDays = FILTER_ALL;
     // this.debug('this.electronService.isElectronApp', this.electronService.isElectronApp);
     if (this.electronService.isElectronApp) {
       // this.debug('electron app');
@@ -125,9 +133,12 @@ export class AppComponent implements AfterViewChecked, OnInit {
   }
 
   ngAfterViewChecked() {
-    if (this.openTask) {
-      this.taskNameEdit.nativeElement.focus();
-    }
+    // if (this.openTask) {
+    //   this.taskNameEdit.nativeElement.focus();
+    // }
+    taskNames = this.tasks.map( (item) => {
+      return item.name;
+    }).filter((value, index, self) => self.indexOf(value) === index);
   }
 
   loadData(tasks: Task[]) {
@@ -282,17 +293,17 @@ export class AppComponent implements AfterViewChecked, OnInit {
     const dayBefore = new Date(this.selectedDate.getTime());
     dayBefore.setDate(dayBefore.getDate() - 1);
     this.setDate(dayBefore);
-    if (this.filterDays !== this.FILTER_ALL) {
+    if (this.filterDays !== FILTER_ALL) {
       const yearStart = new Date(this.selectedDate.getTime());
       yearStart.setMonth(0, 1);
       let dayTasks = this.getDayTasks(dayBefore);
-      let found = this.filterDays === this.FILTER_FULL ? dayTasks.length > 0 : dayTasks.length === 0;
+      let found = this.filterDays === FILTER_FULL ? dayTasks.length > 0 : dayTasks.length === 0;
       while (!found && dayBefore > yearStart) {
         dayBefore.setDate(dayBefore.getDate() - 1);
         this.debug(['checking', dayBefore], 1);
         this.setDate(dayBefore);
         dayTasks = this.getDayTasks(dayBefore);
-        found = this.filterDays === this.FILTER_FULL ? dayTasks.length > 0 : dayTasks.length === 0;
+        found = this.filterDays === FILTER_FULL ? dayTasks.length > 0 : dayTasks.length === 0;
       }
     }
   }
@@ -301,17 +312,17 @@ export class AppComponent implements AfterViewChecked, OnInit {
     const dayAfter = new Date(this.selectedDate.getTime());
     dayAfter.setDate(dayAfter.getDate() + 1);
     this.setDate(dayAfter);
-    if (this.filterDays !== this.FILTER_ALL) {
+    if (this.filterDays !== FILTER_ALL) {
       const yearEnd = new Date(this.selectedDate.getTime());
       yearEnd.setMonth(11, 31);
       let dayTasks = this.getDayTasks(dayAfter);
-      let found = this.filterDays === this.FILTER_FULL ? dayTasks.length > 0 : dayTasks.length === 0;
+      let found = this.filterDays === FILTER_FULL ? dayTasks.length > 0 : dayTasks.length === 0;
       while (!found && dayAfter < yearEnd) {
         dayAfter.setDate(dayAfter.getDate() + 1);
         this.debug(['checking', dayAfter], 1);
         this.setDate(dayAfter);
         dayTasks = this.getDayTasks(dayAfter);
-        found = this.filterDays === this.FILTER_FULL ? dayTasks.length > 0 : dayTasks.length === 0;
+        found = this.filterDays === FILTER_FULL ? dayTasks.length > 0 : dayTasks.length === 0;
       }
     }
   }
@@ -490,6 +501,16 @@ export class AppComponent implements AfterViewChecked, OnInit {
     }
     this.clearSelection();
     this.saveData();
+  }
+
+  search(text$: Observable<string>) {
+
+    return text$.pipe(
+      debounceTime(200),
+      distinctUntilChanged(),
+      map(term => term.length < 2 ? []
+        : taskNames.filter( name => name?.toLowerCase().indexOf(term.toLowerCase()) > -1).slice(0, 10) )
+    );
   }
 
   private debug(messages, level) {

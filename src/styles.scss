@@ -1,20 +1,42 @@
-/*
- * Globals
- */
-$bg: #383838;
-$bg-light: #404040;
-$bg-button: #494949;
-$bg-lighter: #565656;
+$gerbil-darker-gray: #2f2f2f; //border dark
+$gerbil-darkish-gray: #333; //badge dark
+$gerbil-dark-gray: #383838; //bg
+$gerbil-gray: #404040; //bg light
+$gerbil-light-gray: #565656; //bg lighter
+$gerbil-lighter-gray: #868686; //text muted
+$gerbil-white: #cfcfcf; //text
 
-$border-dark: #2f2f2f;
+$enable-shadows: false;
 
-$text: #cfcfcf;
-$text-muted: #868686;
+$gray-100: $gerbil-gray;
+$dark: $gerbil-gray;
+
+$body-bg: $gerbil-dark-gray;
+$body-color: $gerbil-white; 
+
+$card-bg: $gerbil-gray;
+$card-border-color: $gerbil-darker-gray;
+
+$list-group-color: $gerbil-white;
+$list-group-bg: $gerbil-gray;
+
+$input-bg: $gerbil-gray;
+$input-color: $gerbil-white;
+$input-border-color: $gerbil-darker-gray;
+$input-placeholder-color: $gerbil-lighter-gray;
+// $input-focus-bg: $gerbil-light-gray;
+$input-focus-border-color: $gerbil-lighter-gray;
+$input-focus-box-shadow: $gerbil-light-gray !important;
+// $input-box-shadow: 0px 0px 0px 0.2rem;
+
+
+$progress-bg: $gerbil-gray;
+$progress-bar-color: $gerbil-white;
+$progress-bar-bg: $gerbil-lighter-gray;
 
 html,
 body {
   height: 100%;
-  background-color: $bg;
 }
 
 body {
@@ -24,7 +46,6 @@ body {
   -ms-flex-pack: center;
   -webkit-box-pack: center;
   justify-content: center;
-  color: $text;
 }
 
 .cover {
@@ -35,29 +56,12 @@ body {
   font-weight: 700;
 }
 
-.list-group-item-light {
-  background-color: $bg-light;
-  color: $text;
-}
-
-.bg-secondary {
-  background-color: $bg-lighter !important;
-}
-
-.bg-dark {
-  background-color: $bg-light !important;
-}
-
 .progress {
   height: 1.25rem;
 }
 
 .text-small {
   font-size: .75rem;
-}
-
-.btn-dark {
-  background-color: $bg-button;
 }
 
 .hours {
@@ -69,7 +73,6 @@ body {
 .scrollable {
   overflow-y: auto;
   overflow-x: hidden;
-  // max-height: 35vh;
 }
 
 .task-list {
@@ -81,62 +84,57 @@ body {
 }
 
 .card {
-  border-color: $border-dark;
-  background-color: $bg-light;
-
-  .form-control {
-    background-color: $bg;
-    color: $text;
-    border-color: $border-dark;
-  
-    &::placeholder {
-      color: $text-muted;
-    }
-  
-    &:focus {
-      color: $text; 
-      background-color: $bg;
-      box-shadow: 0 0 0 .2rem rgba(134, 134, 134, 0.25);
-      border-color: $border-dark;
-    }
-  }
-
   .list-group {    
     .list-group-item {
       padding: 0.25rem 0.5rem;
       font-size: 0.75rem;
 
-      &:hover{
-        background-color: $bg-lighter;
-        color: $text;
-      }
+      &.list-group-item-gerbil {
+        background-color: $gerbil-gray;
+        color: $gerbil-lighter-gray;
 
-      .badge-dark {
-        background-color: #333;
+        &:hover, &:active, &:focus {
+          background-color: $gerbil-light-gray;
+          color: $gerbil-white;
+        }
+
+        &:focus {
+          background-color: $gerbil-lighter-gray;
+          color: #fff;
+        }
       }
     }
   }
 }
 
+.form-control.form-control-gerbil:focus {
+  box-shadow: $gerbil-light-gray 0px 0px 0px 0.2rem !important;
+}
+
 .totals-overview {
   .progress-bar {
     overflow: initial;
+
+    &.progress-bar-gerbil {
+      background-color: $gerbil-light-gray !important;
+    }
   }
 }
 
-.form-control {
-  background-color: $bg-light;
-  color: $text;
-  border-color: $border-dark;
+.dropdown-menu {
+  background-color: $gerbil-gray !important;
+  color: $gerbil-lighter-gray !important;
 
-  &::placeholder {
-    color: $text-muted;
-  }
-
-  &:focus {
-    color: $text; 
-    background-color: $bg-light;
-    box-shadow: 0 0 0 .2rem rgba(134, 134, 134, 0.25);
-    border-color: $border-dark;
+  .dropdown-item {
+    color: $gerbil-lighter-gray !important;
+    &.active {
+      background-color: $gerbil-light-gray !important;
+      color: $gerbil-white !important;
+    }
   }
 }
+
+/* Importing Bootstrap SCSS file. */
+@import '~bootstrap/scss/bootstrap';
+/* Importing Bootstrap SCSS file. */
+@import '~bootstrap/scss/bootstrap';
