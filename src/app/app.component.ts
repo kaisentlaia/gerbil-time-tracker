@@ -333,7 +333,7 @@ export class AppComponent implements AfterViewInit {
 
   selectTask(task) {
     this.selectedTask = task;
-    this.debug(['selected task', task],1);
+    this.debug(['selected task', task],3);
   }
 
   editTask() {
@@ -387,10 +387,12 @@ export class AppComponent implements AfterViewInit {
         if(savedFound || isSelected) {
           if(!savedFound) { savedFound = isSelected; }
           if (task.end && task.start > task.end) {
-            task.end = task.start;
+            this.debug(["task.start > task.end", task.start, task.end],3);
+            task.end = new Date(task.start.getTime());
           }
-          if ( prevTask?.end && task.start < prevTask?.end ) {
-            prevTask.end = task.start;
+          if ( prevTask?.end && task.start.getTime() != prevTask?.end.getTime() ) {
+            this.debug(["task.end != prevTask?.start", task.end, prevTask?.start],1);
+            prevTask.end = new Date(task.start.getTime());
           }
         }
       });
@@ -404,10 +406,12 @@ export class AppComponent implements AfterViewInit {
         if(savedFound || isSelected) {
           if(!savedFound) { savedFound = isSelected; }
           if (task.end && task.start > task.end) {
-            task.end = task.start;
+            this.debug(["task.start > task.end", task.start, task.end],1);
+            task.end = new Date(task.start.getTime());
           }
-          if(task.end && task.end > nextTask?.start) {
-            nextTask.start = task.end;
+          if(task.end && task.end.getTime() != nextTask?.start.getTime()) {
+            this.debug(["task.end != nextTask?.start", task.end, nextTask?.start],1);
+            nextTask.start = new Date(task.end.getTime());
           }
         }
       });
@@ -420,7 +424,7 @@ export class AppComponent implements AfterViewInit {
       //   return !tooShort;
       // });
     }
-    this.debug(["this.todayTasks now is", this.todayTasks, "-------"],1);
+    // this.debug(["this.todayTasks now is", this.todayTasks, "-------"],1);
 
     this.clearSelection();
     this.saveData();
