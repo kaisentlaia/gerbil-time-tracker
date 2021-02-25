@@ -1,15 +1,15 @@
-import { Component, AfterViewChecked, NgZone, ViewChild, ElementRef } from '@angular/core';
+import { Component, AfterViewChecked, NgZone, ViewChild, ElementRef, OnInit } from '@angular/core';
 import { Task } from './task.model';
 import { Observable, interval, Subscription } from 'rxjs';
 import { ElectronService } from 'ngx-electron';
-import { faMagic, faCaretRight, faCaretLeft, faCalendar, faCalendarAlt, faCalendarCheck } from '@fortawesome/free-solid-svg-icons';
+import { faMagic, faCaretRight, faCaretLeft, faCalendar, faCalendarAlt, faCalendarCheck, faCalendarDay, faPlay, faStop, faRandom } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss']
 })
-export class AppComponent implements AfterViewChecked {
+export class AppComponent implements AfterViewChecked, OnInit {
   title = 'gerbil';
   private updateSubscription: Subscription;
   @ViewChild('taskNameNew') taskNameNew: ElementRef;
@@ -20,6 +20,10 @@ export class AppComponent implements AfterViewChecked {
   faCalendar = faCalendar;
   faCalendarAlt = faCalendarAlt;
   faCalendarCheck = faCalendarCheck;
+  faCalendarDay = faCalendarDay;
+  faPlay = faPlay;
+  faStop = faStop;
+  faRandom = faRandom;
 
   debugLevel = 1;
 
@@ -177,6 +181,7 @@ export class AppComponent implements AfterViewChecked {
       this.tasks.push(this.activeTask);
       this.newTask = null;
       this.saveData();
+      this.taskNameNew?.nativeElement.focus();
     }
   }
 
@@ -367,6 +372,7 @@ export class AppComponent implements AfterViewChecked {
   clearSelection() {
     this.selectedTask = undefined;
     this.openTask = undefined;
+    this.taskNameNew?.nativeElement.focus();
   }
 
   selectTask(task) {

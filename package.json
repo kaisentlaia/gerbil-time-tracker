@@ -1,6 +1,6 @@
 {
   "name": "gerbil",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "main": "main.ts",
   "description": "A simple time tracker",
   "author": "Kaisentlaia <kaisentlaia@gmail.com>",
