@@ -16,6 +16,8 @@ export class AppComponent implements AfterViewInit {
   faCaretRight = faCaretRight;
   faCaretLeft = faCaretLeft;
 
+  debugLevel = 1;
+
   tasks: Task[];
   todayTasks: Task[];
   activeTask: Task;
@@ -42,19 +44,19 @@ export class AppComponent implements AfterViewInit {
         }
       }
     );
-    this.useMagic = false;
+    this.useMagic = true;
   }
 
   ngAfterViewInit() {
-    // console.log('this.electronService.isElectronApp', this.electronService.isElectronApp);
+    // this.debug('this.electronService.isElectronApp', this.electronService.isElectronApp);
     if (this.electronService.isElectronApp) {
-      // console.log('electron app');
+      // this.debug('electron app');
       this.electronService.ipcRenderer.send('load');
       this.electronService.ipcRenderer.on('loadResult', (event, args) => {
         this.ngZone.run( () => this.loadData(args) );
       });
     } else {
-      // console.log('browser app');
+      // this.debug('browser app');
       this.loadData([
         {
           name: 'yesterday',
@@ -111,7 +113,7 @@ export class AppComponent implements AfterViewInit {
   }
 
   loadData(tasks: Task[]) {
-    // console.log('loadData', tasks);
+    this.debug(['loadData', tasks], 3);
     this.tasks = tasks.map((item: Task) => {
       item.start = new Date(item.start);
       if (item.end) {
@@ -123,11 +125,12 @@ export class AppComponent implements AfterViewInit {
   }
 
   updateTodayTasks() {
-    // console.log('selected date:', this.selectedDate);
-    // console.log('tasks', this.tasks);
+    this.debug(["updateTodayTasks"],3);
+    // this.debug('selected date:', this.selectedDate);
+    // this.debug('tasks', this.tasks);
     this.activeTask = undefined;
     this.todayTasks = this.getTodayTasks();
-    // console.log('todayTasks', this.todayTasks);
+    // this.debug('todayTasks', this.todayTasks);
     if (this.todayTasks.length > 0 && this.todayTasks[this.todayTasks.length - 1].end === null) {
       this.activeTask = this.todayTasks[this.todayTasks.length - 1];
     }
@@ -146,6 +149,7 @@ export class AppComponent implements AfterViewInit {
   }
 
   beginTask(newTask) {
+    this.debug(["beginTask"],3);
     if (typeof(newTask) !== 'undefined' && newTask && newTask !== '') {
       const now = new Date();
       now.setDate(this.selectedDate.getDate());
@@ -166,6 +170,7 @@ export class AppComponent implements AfterViewInit {
   }
 
   saveData() {
+    this.debug(["saveData"],3);
     if (this.electronService.isElectronApp) {
       this.electronService.ipcRenderer.send('save', this.tasks);
     }
@@ -173,6 +178,7 @@ export class AppComponent implements AfterViewInit {
   }
 
   switchTask(newTask) {
+    this.debug(["switchTask"],3);
     if (typeof(newTask) !== 'undefined' && newTask && newTask !== '') {
       if (typeof(this.activeTask) !== 'undefined') { this.endTask(); }
       this.beginTask(newTask);
@@ -180,9 +186,18 @@ export class AppComponent implements AfterViewInit {
   }
 
   endTask() {
-    const now = new Date();
+    this.debug(["endTask"],3);
+    let dayEnd = new Date(this.selectedDate.getTime());
+    dayEnd.setHours(23);
+    dayEnd.setMinutes(59);
+    dayEnd.setSeconds(59);
+    dayEnd.setMilliseconds(999);
+    let now = new Date();
     now.setSeconds(0);
     now.setMilliseconds(0);
+    if(dayEnd<now) {
+      now = dayEnd;
+    }
     this.tasks.find(x => x.name === this.activeTask.name && x.start === this.activeTask.start && x.end === this.activeTask.end ).end = now;
     this.activeTask = undefined;
     this.saveData();
@@ -237,6 +252,7 @@ export class AppComponent implements AfterViewInit {
 
   setDate(newDate) {
     if (newDate === null) { newDate = new Date(); }
+    this.clearSelection();
     newDate.setHours(0);
     newDate.setMinutes(0);
     newDate.setSeconds(0);
@@ -258,20 +274,21 @@ export class AppComponent implements AfterViewInit {
   }
 
   updateTotals() {
+    this.debug(["updateTotals"],3);
     const totals = {};
-    // console.log('updateTotals called, todayTasks ', this.todayTasks);
+    // this.debug('updateTotals called, todayTasks ', this.todayTasks);
     let maxValue = 0;
     this.totalHours = 0;
     for (const task of this.todayTasks) {
-      // console.log('processing task ', task);
+      // this.debug('processing task ', task);
       if (!totals.hasOwnProperty(task.name)) {
-        // console.log('creating ' + task.name + ' key in totals');
+        // this.debug('creating ' + task.name + ' key in totals');
         totals[task.name] = {total: 0};
       }
       totals[task.name].name = task.name;
       let tempEnd = new Date();
       if (task.end == null && !totals[task.name].active) {
-        // console.log('setting task end date to now');
+        // this.debug('setting task end date to now');
         totals[task.name].active = true;
       } else {
         tempEnd = task.end;
@@ -302,7 +319,7 @@ export class AppComponent implements AfterViewInit {
 
     this.totals = sortable;
 
-    // console.log('calculated totals ', this.totals);
+    // this.debug('calculated totals ', this.totals);
   }
 
   millisToDecH(millis) {
@@ -316,7 +333,7 @@ export class AppComponent implements AfterViewInit {
 
   selectTask(task) {
     this.selectedTask = task;
-    console.log('selected task', task);
+    this.debug(['selected task', task],1);
   }
 
   editTask() {
@@ -328,11 +345,11 @@ export class AppComponent implements AfterViewInit {
     if (this.selectedTask.end) {
       this.openTask.endTime = this.selectedTask.end.getHours() + ':' + this.selectedTask.end.getMinutes();
     }
-    console.log('editing task', this.openTask);
+    this.debug(['editing task', this.openTask],3);
   }
 
   saveTask() {
-    console.log('saving task', this.openTask);
+    this.debug(['saving task', this.openTask],3);
     // new object to avoid overwriting problems
     const savedTask = this.selectedTask;
 
@@ -365,78 +382,45 @@ export class AppComponent implements AfterViewInit {
       let savedFound = false;
       this.todayTasks.reverse().map( (task, index) => {
         const prevIndex = index + 1;
-        const nextIndex = index - 1;
         const prevTask = prevIndex < this.todayTasks.length ? this.todayTasks[prevIndex] : null;
-        const nextTask = nextIndex >= 0 ? this.todayTasks[nextIndex] : null;
-        const prevIsSelected = prevTask === savedTask;
         const isSelected = task === savedTask;
-        const nextIsSelected = nextTask === savedTask;
-        if (!savedFound) {
-          savedFound = isSelected;
-        } else {
-  
-          if (task.start > prevTask?.end || task.start < prevTask?.end) {
-            if (prevIsSelected) {
-              task.start = prevTask.end;
-            } else {
-              prevTask.end = task.start;
-            }
-          }
-          if (task.end && (task.end < nextTask?.start || task.end > nextTask?.start)) {
-            if (nextIsSelected) {
-              task.end = nextTask.start;
-            } else {
-              nextTask.start = task.end;
-            }
-          }
-  
-          if (task.start > task.end) {
-            task.end = task.start;
-          }
-  
-          if (!this.useMagic && task.start === task.end) {
-            this.todayTasks.splice(index, 1);
-          }
-        }
-      });
-  
-      savedFound = false;
-      this.todayTasks.reverse().map( (task, index) => {
-        const prevIndex = index - 1;
-        const nextIndex = index + 1;
-        const prevTask = prevIndex >= 0 ? this.todayTasks[prevIndex] : null;
-        const nextTask = nextIndex < this.todayTasks.length ? this.todayTasks[nextIndex] : null;
-        const prevIsSelected = prevTask === savedTask;
-        const isSelected = task === savedTask;
-        const nextIsSelected = nextTask === savedTask;
-        if (!savedFound) {
-          savedFound = isSelected;
-        } else {
-  
-          if ( task.start > prevTask?.end || task.start < prevTask?.end) {
-            if (prevIsSelected) {
-              prevTask.end = task.start;
-            } else {
-              task.start = prevTask.end;
-            }
-          }
-          if (task.end && (task.end < nextTask?.start || task.end > nextTask?.start)) {
-            if (nextIsSelected) {
-              task.end = nextTask.start;
-            } else {
-              nextTask.start = task.end;
-            }
-          }
+        if(savedFound || isSelected) {
+          if(!savedFound) { savedFound = isSelected; }
           if (task.end && task.start > task.end) {
             task.end = task.start;
           }
-  
-          if (!this.useMagic && task.start === task.end) {
-            this.todayTasks.splice(index, 1);
+          if ( prevTask?.end && task.start < prevTask?.end ) {
+            prevTask.end = task.start;
           }
         }
       });
+
+      // then again in the original order
+      savedFound = false;
+      this.todayTasks.reverse().map( (task, index) => {
+        const nextIndex = index + 1;
+        const nextTask = nextIndex < this.todayTasks.length ? this.todayTasks[nextIndex] : null;
+        const isSelected = task === savedTask;
+        if(savedFound || isSelected) {
+          if(!savedFound) { savedFound = isSelected; }
+          if (task.end && task.start > task.end) {
+            task.end = task.start;
+          }
+          if(task.end && task.end > nextTask?.start) {
+            nextTask.start = task.end;
+          }
+        }
+      });
+
+      // this.todayTasks = this.todayTasks.filter( (task) => {
+      //   let tooShort = task.start === task.end;
+      //   if(tooShort) {
+      //     this.debug(["task too short, deleting", task, "-------"],1);
+      //   }
+      //   return !tooShort;
+      // });
     }
+    this.debug(["this.todayTasks now is", this.todayTasks, "-------"],1);
 
     this.clearSelection();
     this.saveData();
@@ -458,5 +442,13 @@ export class AppComponent implements AfterViewInit {
     }
     this.clearSelection();
     this.saveData();
+  }
+
+  private debug(messages, level) {
+    if(this.debugLevel>0 && level<=this.debugLevel) {
+      messages.map((message) => {
+        console.debug(message);
+      });
+    }
   }
 }
