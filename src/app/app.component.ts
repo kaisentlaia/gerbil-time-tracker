@@ -77,66 +77,12 @@ export class AppComponent implements AfterViewChecked, OnInit {
       });
     } else {
       // this.debug('browser app');
-      this.loadData([
-        {
-          name: 'yesterday',
-          start: new Date('2021-02-20T11:13:00.000Z'),
-          end: new Date('2021-02-20T11:13:00.000Z')
-        },
-        {
-          name: 'uno',
-          start: new Date('2021-02-21T11:13:00.000Z'),
-          end: new Date('2021-02-21T12:19:00.000Z')
-        },
-        {
-          name: 'due',
-          start: new Date('2021-02-21T12:19:00.000Z'),
-          end: new Date('2021-02-21T15:30:00.000Z')
-        },
-        {
-          name: 'anotherthing',
-          start: new Date('2021-02-21T15:30:00.000Z'),
-          end: new Date('2021-02-21T15:32:00.000Z')
-        },
-        {
-          name: 'zzzzz',
-          start: new Date('2021-02-21T15:32:00.000Z'),
-          end: new Date('2021-02-21T15:51:00.000Z')
-        },
-        {
-          name: 'anotherthing',
-          start: new Date('2021-02-21T15:51:00.000Z'),
-          end: new Date('2021-02-21T16:06:00.000Z')
-        },
-        {
-          name: 'zzzzz',
-          start: new Date('2021-02-21T16:06:00.000Z'),
-          end: new Date('2021-02-21T16:54:00.000Z')
-        },
-        {
-          name: 'uno',
-          start: new Date('2021-02-21T16:54:00.000Z'),
-          end: new Date('2021-02-21T17:12:00.000Z')
-        },
-        {
-          name: 'nuovo',
-          start: new Date('2021-02-21T17:12:00.000Z'),
-          end: new Date('2021-02-21T17:20:00.000Z')
-        },
-        {
-          name: 'uno',
-          start: new Date('2021-02-21T17:20:00.000Z'),
-          end: null
-        }
-      ]);
+      this.loadData([]);
     }
   }
 
   ngAfterViewChecked() {
-    // if (this.openTask) {
-    //   this.taskNameEdit.nativeElement.focus();
-    // }
-    taskNames = this.tasks.map( (item) => {
+    taskNames = this.tasks?.map( (item) => {
       return item.name;
     }).filter((value, index, self) => self.indexOf(value) === index);
   }

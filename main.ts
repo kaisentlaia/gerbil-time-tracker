@@ -45,8 +45,9 @@ function saveData(data) {
 
 function loadData() {
   const store = new Store();
+  const tasks = store.get('tasks');
 
-  return store.get('tasks');
+  return tasks?tasks:[];
 }
 
 ipcMain.on('save', (event, arg) =>
