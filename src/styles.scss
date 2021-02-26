@@ -1,3 +1,4 @@
+// MAYBE color themes? or dark mode https://www.electronjs.org/docs/tutorial/dark-mode
 $gerbil-darker-gray: #2f2f2f; //border dark
 $gerbil-darkish-gray: #333; //badge dark
 $gerbil-dark-gray: #383838; //bg
@@ -91,7 +92,7 @@ body {
 
       &.list-group-item-gerbil {
         background-color: $gerbil-gray;
-        color: $gerbil-lighter-gray;
+        color: $gerbil-white;
 
         &:hover, &:active, &:focus {
           background-color: $gerbil-light-gray;
