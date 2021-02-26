@@ -1,8 +1,8 @@
 # Gerbil Time Tracker
 
-Gerbil is a minimalistic personal time tracker inspired by [Project Hamster](https://github.com/projecthamster/hamster). It doesn't have as many features, Gerbil aims to be simple and quick to use.
+Gerbil is a minimalist personal time tracker inspired by [Project Hamster](https://github.com/projecthamster/hamster). It doesn't have as many features, Gerbil aims to be simple and quick to use.
 
-The application is actually in beta.
+The application is currently in beta.
 
 ## Installation
 
