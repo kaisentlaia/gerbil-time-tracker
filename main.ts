@@ -1,5 +1,7 @@
 /// <reference path="main.d.ts" />
 
+// ONE DAY add test suite http://www.protractortest.org/#/
+
 const {app, BrowserWindow, ipcMain, Menu, Tray} = require('electron');
 const url = require('url');
 const path = require('path');

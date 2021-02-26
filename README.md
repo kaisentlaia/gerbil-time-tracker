@@ -1,5 +1,3 @@
-[//]: # ONE DAY add test suite http://www.protractortest.org/#/
-
 # Gerbil Time Tracker
 
 Gerbil is a minimalistic personal time tracker inspired by [Project Hamster](https://github.com/projecthamster/hamster). It doesn't have as many features, Gerbil aims to be simple and quick to use.
