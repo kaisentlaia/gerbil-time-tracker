@@ -12,6 +12,7 @@ let taskNames = [] as string[];
 const FILTER_ALL = 0;
 const FILTER_EMPTY = 1;
 const FILTER_FULL = 2;
+
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
@@ -351,7 +352,6 @@ export class AppComponent implements AfterViewChecked, OnInit {
 
   saveTask() {
     this.debug(['saving task', this.openTask], 3);
-    // new object to avoid overwriting problems
     const savedTask = this.selectedTask;
 
     // parsing form data
@@ -417,15 +417,7 @@ export class AppComponent implements AfterViewChecked, OnInit {
         }
       });
 
-      // this.todayTasks = this.todayTasks.filter( (task) => {
-      //   let tooShort = task.start === task.end;
-      //   if(tooShort) {
-      //     this.debug(["task too short, deleting", task, "-------"],1);
-      //   }
-      //   return !tooShort;
-      // });
     }
-    // this.debug(["this.todayTasks now is", this.todayTasks, "-------"],1);
 
     this.clearSelection();
     this.saveData();
@@ -437,6 +429,7 @@ export class AppComponent implements AfterViewChecked, OnInit {
     return {index: foundIndex, todayIndex: foundTodayIndex};
   }
 
+  // MAYBE add modal before delete?
   deleteTask() {
     const indexes = this.getTaskIndex(this.selectedTask);
     if (indexes.index > -1) {
