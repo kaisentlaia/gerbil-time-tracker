@@ -24,7 +24,7 @@
           <p class="font-weight-bold mb-auto">{{getDurationString(activeTask)}}</p>
         </div>
         <div class="text-right">
-          <button *ngIf="activeTask" type="button" class="btn btn-danger" (click)="endTask(); clearSelection();" tabindex="6"><fa-icon [icon]="faStop"></fa-icon></button>
+          <button *ngIf="activeTask" type="button" class="btn btn-danger" (click)="endTask(); clearSelection();" tabindex="6" title="Stop current task"><fa-icon [icon]="faStop"></fa-icon></button>
         </div>
       </div>
   
@@ -33,8 +33,8 @@
           <input name="taskName" type="text" class="form-control form-control-gerbil" placeholder="Task name" [(ngModel)]="newTask" (keyup.enter)="switchTask(newTask)" (click)="clearSelection()" (keyup.esc)="newTask=null" tabindex="7" [ngbTypeahead]="search" #taskNameNew autofocus>
         </div>
         <div>
-          <button *ngIf="!activeTask" type="button" class="ml-2 btn btn-success" (click)="beginTask(newTask)" [disabled]="!newTask" tabindex="8"><fa-icon [icon]="faPlay"></fa-icon></button>
-          <button *ngIf="activeTask" type="button" class="ml-2 btn btn-dark" (click)="switchTask(newTask)" [disabled]="!newTask" tabindex="9"><fa-icon [icon]="faRandom"></fa-icon></button>
+          <button *ngIf="!activeTask" type="button" class="ml-2 btn btn-success" (click)="beginTask(newTask)" [disabled]="!newTask" tabindex="8" title="Start tracking"><fa-icon [icon]="faPlay"></fa-icon></button>
+          <button *ngIf="activeTask" type="button" class="ml-2 btn btn-dark" (click)="switchTask(newTask)" [disabled]="!newTask" tabindex="9" title="Switch to new task"><fa-icon [icon]="faRandom"></fa-icon></button>
         </div>
       </div>
 
@@ -46,6 +46,7 @@
         <div class="col mh-100 d-flex flex-column">
           <div class="card scrollable mh-100 h-100">
   
+            <!-- MAYBE hidden instead of destroyed for form input focus? -->
             <ul *ngIf="!openTask" class="list-group list-group-flush">
               <li class="list-group-item list-group-item-gerbil list-group-item-action list-group-item-dark d-flex justify-content-between align-items-center" *ngFor="let task of todayTasks; let i = index" (click)="selectTask(task)" (focus)="selectTask(task)" (keyup.enter)="editTask()" (keyup.delete)="deleteTask()" (keyup.esc)="clearSelection()" [ngClass]="(selectedTask==task)?'active':''" [tabindex]="i+10" (dblclick)="editTask()">
                 <span class="hours">{{task.start | date: 'HH:mm'}} - {{task.end | date: 'HH:mm'}}</span>
