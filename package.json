@@ -1,9 +1,10 @@
 {
-  "name": "gerbil",
-  "version": "0.3.0",
+  "name": "gerbil-time-tracker",
+  "version": "0.3.6",
   "main": "main.ts",
-  "description": "A simple time tracker",
+  "description": "A minimalistic time tracker",
   "author": "Kaisentlaia <kaisentlaia@gmail.com>",
+  "homepage": "https://github.com/kaisentlaia/gerbil-time-tracker",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
@@ -21,6 +22,7 @@
     "dist-linux": "electron-builder --linux"
   },
   "build": {
+    "compression": "maximum",
     "appId": "gerbil.time.tracker",
     "files": [
       "dist/**/*",
@@ -50,15 +52,20 @@
         "AppImage",
         "deb",
         "dir"
-      ]
+      ],
+      "category": "Utility",
+      "icon": "dist/icons/icon.icns"
     },
     "win": {
-      "target": "portable",
+      "target": ["portable","nsis"],
       "icon": "dist/favicon.ico"
     }
   },
   "private": true,
   "dependencies": {
+    "electron-store": "^7.0.2"
+  },
+  "devDependencies": {
     "@angular/animations": "~9.1.0",
     "@angular/common": "~9.1.0",
     "@angular/compiler": "~9.1.0",
@@ -74,14 +81,11 @@
     "@ng-bootstrap/ng-bootstrap": "^6.2.0",
     "bootstrap": "^4.6.0",
     "electron-reload": "^1.5.0",
-    "electron-store": "^7.0.2",
     "jquery": "^3.5.1",
     "ngx-electron": "^2.2.0",
     "rxjs": "~6.5.4",
     "tslib": "^1.10.0",
-    "zone.js": "~0.10.2"
-  },
-  "devDependencies": {
+    "zone.js": "~0.10.2",
     "@angular-devkit/build-angular": "~0.901.0",
     "@angular/cli": "~9.1.0",
     "@angular/compiler-cli": "~9.1.0",

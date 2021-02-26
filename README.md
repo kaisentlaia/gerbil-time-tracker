@@ -1,27 +1,35 @@
-# Gerbil
+[//]: # ONE DAY add test suite http://www.protractortest.org/#/
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 9.1.0.
+# Gerbil Time Tracker
 
-## Development server
+Gerbil is a minimalistic personal time tracker inspired by [Project Hamster](https://github.com/projecthamster/hamster). It doesn't have as many features, Gerbil aims to be simple and quick to use.
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The app will automatically reload if you change any of the source files.
+The application is actually in beta.
 
-## Code scaffolding
+## Installation
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+To install Gerbil head over to the [Releases Page](https://github.com/kaisentlaia/gerbil-time-tracker/releases) and download either the Windows installer, the Linux *.deb package or the appropriate portable version for your OS. 
 
-## Build
+## Usage
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory. Use the `--prod` flag for a production build.
+Check out the [Wiki](https://github.com/kaisentlaia/gerbil-time-tracker/wiki) for more inforation about Gerbil usage.
 
-## Running unit tests
+## Backup
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
+All the tracking data is saved automatically in the following file:
 
-## Running end-to-end tests
+### Linux
 
-Run `ng e2e` to execute the end-to-end tests via [Protractor](http://www.protractortest.org/).
+```
+/home/user/.config/gerbil-time-tracker/config.json
+```
 
-## Further help
+### Windows
 
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI README](https://github.com/angular/angular-cli/blob/master/README.md).
+```
+/%appdata%/gerbil-time-tracker/config.json
+```
+
+## Development
+
+Gerbil has been developed using Angular 9.1.13 and Electron. The application has not been tested with other Angular versions, so it's suggested to use 9.1.13 for development.
