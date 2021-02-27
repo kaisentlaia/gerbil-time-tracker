@@ -123,7 +123,7 @@ export class AppComponent implements AfterViewChecked, OnInit {
 
   beginTask(newTask) {
     this.debug(['beginTask'], 3);
-    if (typeof(newTask) !== 'undefined' && newTask && newTask !== '') {
+    if (typeof(newTask) !== 'undefined' && newTask && newTask.trim() !== '') {
       const now = new Date();
       now.setDate(this.selectedDate.getDate());
       now.setMonth(this.selectedDate.getMonth());
@@ -131,7 +131,7 @@ export class AppComponent implements AfterViewChecked, OnInit {
       now.setSeconds(0);
       now.setMilliseconds(0);
       this.activeTask = {
-        name: newTask,
+        name: newTask.trim(),
         start: now,
         end: null
       } as Task;
@@ -153,9 +153,14 @@ export class AppComponent implements AfterViewChecked, OnInit {
 
   switchTask(newTask) {
     this.debug(['switchTask'], 3);
-    if (typeof(newTask) !== 'undefined' && newTask && newTask !== '') {
-      if (typeof(this.activeTask) !== 'undefined') { this.endTask(); }
-      this.beginTask(newTask);
+    if (typeof(newTask) !== 'undefined' && newTask && newTask.trim() !== '') {
+      if (newTask.trim() !== this.activeTask?.name) {
+        if (typeof(this.activeTask) !== 'undefined') { this.endTask(); }
+        this.beginTask(newTask.trim());
+      } else {
+        this.newTask = null;
+        this.taskNameNew?.nativeElement.focus();
+      }
     }
   }
 
@@ -448,7 +453,7 @@ export class AppComponent implements AfterViewChecked, OnInit {
   search(text$: Observable<string>) {
 
     return text$.pipe(
-      debounceTime(200),
+      debounceTime(100),
       distinctUntilChanged(),
       map(term => term.length < 2 ? []
         : taskNames.filter( name => name?.toLowerCase().indexOf(term.toLowerCase()) > -1).slice(0, 10) )
