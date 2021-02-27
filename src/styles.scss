@@ -94,14 +94,16 @@ body {
         background-color: $gerbil-gray;
         color: $gerbil-white;
 
-        &:hover, &:active, &:focus {
+        &:hover, &:active {
           background-color: $gerbil-light-gray;
           color: $gerbil-white;
+          outline: none;
         }
 
         &:focus {
           background-color: $gerbil-lighter-gray;
           color: #fff;
+          outline: none;
         }
       }
     }

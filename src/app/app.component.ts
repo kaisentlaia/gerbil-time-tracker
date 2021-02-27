@@ -355,6 +355,7 @@ export class AppComponent implements AfterViewChecked, OnInit {
     if (this.selectedTask.end) {
       this.openTask.endTime = this.selectedTask.end.getHours() + ':' + this.selectedTask.end.getMinutes();
     }
+    this.taskNameEdit?.nativeElement.focus();
     this.debug(['editing task', this.openTask], 3);
   }
 
