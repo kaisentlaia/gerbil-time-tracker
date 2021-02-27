@@ -356,14 +356,14 @@ export class AppComponent implements AfterViewChecked, OnInit {
 
     // parsing form data
     savedTask.name = this.openTask.name;
-    this.openTask.startTime = this.openTask.startTime.toString();
-    this.openTask.endTime = this.openTask.endTime.toString();
     if (this.openTask.startTime.match(/[0-9]{2}:[0-9]{2}/)) {
+      this.openTask.startTime = this.openTask.startTime.toString();
       const startTime = this.openTask.startTime.split(':');
       savedTask.start.setHours(startTime[0]);
       savedTask.start.setMinutes(startTime[1]);
     }
-    if (this.openTask.endTime.match(/[0-9]{2}:[0-9]{2}/)) {
+    if (this.openTask.endTime?.match(/[0-9]{2}:[0-9]{2}/)) {
+      this.openTask.endTime = this.openTask.endTime.toString();
       const endTime = this.openTask.endTime.split(':');
       if (!savedTask.end) {
         savedTask.end = new Date(savedTask.start.getTime());
@@ -374,7 +374,7 @@ export class AppComponent implements AfterViewChecked, OnInit {
     } else {
       savedTask.end = null;
     }
-    if (savedTask.start > savedTask.end) {
+    if (savedTask.end && savedTask.start > savedTask.end) {
       savedTask.end = savedTask.start;
     }
 
