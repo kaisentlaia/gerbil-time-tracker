@@ -167,10 +167,13 @@ export class AppComponent implements AfterViewChecked, OnInit {
     dayEnd.setSeconds(59);
     dayEnd.setMilliseconds(999);
     let now = new Date();
+    now.setDate(this.selectedDate.getDate());
+    now.setMonth(this.selectedDate.getMonth());
+    now.setFullYear(this.selectedDate.getFullYear());
     now.setSeconds(0);
     now.setMilliseconds(0);
-    if (dayEnd < now) {
-      now = dayEnd;
+    if (this.activeTask.start > now) {
+      now = new Date(this.activeTask.start.getTime());
     }
     this.tasks.find(x => x.name === this.activeTask.name && x.start === this.activeTask.start && x.end === this.activeTask.end ).end = now;
     this.activeTask = undefined;
@@ -188,7 +191,7 @@ export class AppComponent implements AfterViewChecked, OnInit {
       let minutes = Math.floor((difference / (1000 * 60)) % 60);
       if (hours < 0) { hours = 0; }
       if (minutes < 0) { minutes = 0; }
-      return hours + 'h ' + minutes + 'min';
+      return (hours + minutes) > 0 ? hours + 'h ' + minutes + 'min' : 'just started';
     } else {
       return '';
     }
